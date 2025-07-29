@@ -68,5 +68,5 @@ Este proyecto está bajo la licencia [MIT](LICENSE)
 
 ## ✉️ Contacto
 **Arnaldo A. Ozorio**  
-- 📧 arnaldo.ozorio@email.com  
+- 📧 asesor.teducativo@email.com  
 - 🌐 [Blog Informática BIG BOSS](https://informaticabigbosspy.blogspot.com)
