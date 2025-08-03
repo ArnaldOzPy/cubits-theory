@@ -1,11 +1,11 @@
 # 🧊 Teoría de CUBITs - Implementación Interactiva
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-![GitHub stars](https://img.shields.io/github/stars/tu_usuario/tu_repositorio?style=social)
+![GitHub stars](https://img.shields.io/github/stars/arnaldozpy/cubits-theory?style=social)
 
 Implementación interactiva en HTML/JavaScript de la **Teoría de CUBITs**, un modelo revolucionario para representación multidimensional de datos binarios.
 
-👉 [Ver Demo en Vivo](https://tu-usuario.github.io/tu-repositorio)
+👉 [Ver Demo en Vivo](https://arnaldozoy.github.io/cubits-theory/CUBITs.html)
 
 ## 🚀 Características Principales
 - **Visualización 3D interactiva** de bytes transformados en CUBITs
@@ -53,8 +53,8 @@ cd tu_repositorio
 
 ## 📚 Publicación Científica
 El artículo completo está disponible en:
-- [Descargar en formato Word](articulo/Teoria_CUBITs_Articulo.docx)
-- [Versión preimpresión en PDF](articulo/Preprint_CUBITs.pdf)
+- [Versión preimpresión en PDF](cubits-theory/artículos
+/Articulo_TEORIA-CUBITs.pdf)
 
 ## 🤝 Contribuir
 1. Haz fork del proyecto
