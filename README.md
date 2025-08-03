@@ -28,7 +28,7 @@ Cada bit adquiere propiedades espaciales que permiten:
 
 ## 🛠️ Instalación
 ```bash
-git clone https://github.com/tu_usuario/tu_repositorio.git
+git clone https://github.com/arnaldozpy/cubits-theory.git
 cd tu_repositorio
 # Abrir index.html en cualquier navegador
 ```
@@ -53,7 +53,7 @@ cd tu_repositorio
 
 ## 📚 Publicación Científica
 El artículo completo está disponible en:
-- [Versión preimpresión en PDF](cubits-theory/artículos
+- [Versión preimpresión en PDF](https://arnaldozpy.github.io/cubits-theory/artículos
 /Articulo_TEORIA-CUBITs.pdf)
 
 ## 🤝 Contribuir
