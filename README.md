@@ -53,8 +53,7 @@ cd tu_repositorio
 
 ## 📚 Publicación Científica
 El artículo completo está disponible en:
-- [Versión preimpresión en PDF](https://arnaldozpy.github.io/cubits-theory/artículos
-/Articulo_TEORIA-CUBITs.pdf)
+- [Versión preimpresión en PDF](https://arnaldozpy.github.io/cubits-theory/artículos/Articulo_TEORIA-CUBITs.pdf)
 
 ## 🤝 Contribuir
 1. Haz fork del proyecto
