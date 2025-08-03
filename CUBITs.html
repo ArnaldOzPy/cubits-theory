@@ -552,6 +552,172 @@
                 align-items: flex-start;
             }
         }
+
+
+        .dedication-container {
+            background: linear-gradient(135deg, rgba(44, 62, 80, 0.9), rgba(155, 89, 182, 0.7));
+            border-radius: 15px;
+            padding: 30px;
+            margin: 40px 0;
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            position: relative;
+            overflow: hidden;
+            animation: fadeIn 1s ease;
+            text-align: center;
+        }
+
+        .dedication-container::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><path d="M20,20 Q40,5 50,30 T80,20" stroke="rgba(255,255,255,0.05)" stroke-width="1" fill="none"/><path d="M30,60 Q50,40 70,60" stroke="rgba(255,255,255,0.05)" stroke-width="1" fill="none"/></svg>');
+            opacity: 0.3;
+            z-index: -1;
+        }
+
+        .dedication-title {
+            font-size: 2.2rem;
+            color: var(--warning);
+            margin-bottom: 25px;
+            position: relative;
+            display: inline-block;
+        }
+
+        .dedication-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 4px;
+            background: var(--secondary);
+            border-radius: 2px;
+        }
+
+        .dedication-text {
+            font-size: 1.3rem;
+            line-height: 1.8;
+            max-width: 800px;
+            margin: 0 auto 25px;
+            position: relative;
+        }
+
+        .dedication-text p {
+            margin-bottom: 20px;
+        }
+
+        .dedication-quote {
+            font-style: italic;
+            font-size: 1.4rem;
+            color: var(--warning);
+            padding: 15px 30px;
+            border-left: 4px solid var(--accent);
+            margin: 30px auto;
+            max-width: 700px;
+            background: rgba(0,0,0,0.1);
+            border-radius: 0 10px 10px 0;
+        }
+
+        .family-icons {
+            display: flex;
+            justify-content: center;
+            gap: 25px;
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+
+        .family-icon {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: rgba(243, 156, 18, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            color: var(--warning);
+            border: 2px solid var(--warning);
+            transition: var(--transition);
+            animation: pulse 2s infinite;
+        }
+
+        .family-icon:hover {
+            transform: translateY(-10px) scale(1.1);
+            background: rgba(243, 156, 18, 0.4);
+        }
+
+        .signature {
+            font-family: 'Dancing Script', cursive;
+            font-size: 2.5rem;
+            color: var(--light);
+            margin-top: 30px;
+            text-align: right;
+            padding-right: 50px;
+            position: relative;
+        }
+
+        .signature::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            right: 0;
+            width: 40px;
+            height: 3px;
+            background: var(--accent);
+        }
+
+        /* Animaciones */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(243, 156, 18, 0.4); }
+            70% { transform: scale(1.05); box-shadow: 0 0 0 15px rgba(243, 156, 18, 0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(243, 156, 18, 0); }
+        }
+
+        @media (max-width: 768px) {
+            .dedication-container {
+                padding: 20px;
+            }
+            
+            .dedication-title {
+                font-size: 1.8rem;
+            }
+            
+            .dedication-text {
+                font-size: 1.1rem;
+            }
+            
+            .dedication-quote {
+                font-size: 1.2rem;
+                padding: 10px 20px;
+            }
+            
+            .family-icon {
+                width: 60px;
+                height: 60px;
+                font-size: 2rem;
+            }
+            
+            .signature {
+                font-size: 2rem;
+            }
+        }
+                             
     </style>
 </head>
 <body>
@@ -901,14 +1067,49 @@
                     </div>
                 </div>
             </div>
+        </div>
   
-      
+      <div class="dedication-container">
+            <h2 class="dedication-title">Dedicado a "Mis Hijos"</h2>
+            
+            <div class="dedication-text">
+                <p>Esta Teoría no es solo una afirmación que "estamos desperdiciando información y espacio" sino una oportunidad.</p>
+                
+                <div class="dedication-quote">
+                    "Nunca dejen de imaginar, usar la mente no te hace diferente, te hace intentar hacer todo mejor"
+                </div>
+                
+                <p>Piensen, pero no solo de izquierda a derecha, en línea recta, arriba hacia abajo, piensen en todas direcciones.</p>
+                <p>Estudien, viajen, aprendan, vivan!</p>
+            </div>
+            
+            <div class="family-icons">
+                <div class="family-icon">
+                    <i class="fas fa-brain"></i>
+                </div>
+                <div class="family-icon">
+                    <i class="fas fa-lightbulb"></i>
+                </div>
+                <div class="family-icon">
+                    <i class="fas fa-heart"></i>
+                </div>
+                <div class="family-icon">
+                    <i class="fas fa-globe-americas"></i>
+                </div>
+                <div class="family-icon">
+                    <i class="fas fa-book"></i>
+                </div>
+            </div>
+            
+            <div class="signature">Los amo</div>
+        </div>
+   
         
         <footer>
             <p>Teoría de CUBITs - Un modelo conceptual para la representación tridimensional de datos</p>
             <p>En desarrollo experimental - Arnaldo A. Ozorio</p>
         </footer>
-    </div>
+    
   
 <script>        
    
@@ -998,6 +1199,14 @@
             cube.style.transition = 'transform 1s ease';
         });
     });
+
+ document.querySelectorAll('.dedication-text p').forEach((p, index) => {
+            setTimeout(() => {
+                p.style.opacity = 1;
+                p.style.transform = 'translateY(0)';
+            }, 500 + (index * 300));
+        });
+
     
     // Función para rotar cubos aleatoriamente
     function rotateCubeRandomly() {
