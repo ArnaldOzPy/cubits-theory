@@ -5,7 +5,7 @@
 
 Implementación interactiva en HTML/JavaScript de la **Teoría de CUBITs**, un modelo revolucionario para representación multidimensional de datos binarios.
 
-👉 [Ver Demo en Vivo](https://arnaldozoy.github.io/cubits-theory/CUBITs.html)
+👉 [Ver Demo en Vivo](https://arnaldozpy.github.io/cubits-theory/CUBITs.html)
 
 ## 🚀 Características Principales
 - **Visualización 3D interactiva** de bytes transformados en CUBITs
