@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Transformación de Bits - Real 2D y Conceptual 6D</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+  <style>
+    :root {
+      --primary: #2563eb;
+      --secondary: #7c3aed;
+      --accent: #ec4899;
+      --dark: #1e293b;
+      --light: #f8fafc;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --error: #ef4444;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #1a2a6c, #b21f1f, #1a2a6c);
+      color: var(--light);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 1200px;
+      width: 100%;
+      background: rgba(30, 41, 59, 0.95);
+      border-radius: 20px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
+      overflow: hidden;
+      border: 1px solid rgba(124, 58, 237, 0.3);
+    }
+
+    header {
+      text-align: center;
+      padding: 40px 20px;
+      background: linear-gradient(90deg, var(--primary), var(--secondary));
+    }
+
+    h1 {
+      font-size: 2.8rem;
+      margin-bottom: 10px;
+    }
+
+    .subtitle {
+      font-size: 1.1rem;
+      opacity: 0.9;
+    }
+
+    section {
+      padding: 40px;
+    }
+
+    .section-title {
+      font-size: 2rem;
+      margin-bottom: 20px;
+      color: var(--accent);
+    }
+
+    .input-section {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+
+    #bit-input {
+      padding: 14px;
+      border-radius: 10px;
+      font-size: 1.1rem;
+      flex: 1;
+      border: 2px solid var(--primary);
+      background: var(--dark);
+      color: white;
+    }
+
+    button {
+      padding: 14px 20px;
+      background: linear-gradient(90deg, var(--primary), var(--secondary));
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .vector-display {
+      font-family: 'Courier New', monospace;
+      font-size: 1.1rem;
+      background: rgba(15, 23, 42, 0.9);
+      padding: 15px;
+      border-radius: 10px;
+      margin-top: 10px;
+      border: 1px solid rgba(124, 58, 237, 0.3);
+    }
+
+    .chart-box {
+      margin-top: 30px;
+      background: rgba(15, 23, 42, 0.9);
+      padding: 20px;
+      border-radius: 12px;
+      border: 1px solid rgba(124, 58, 237, 0.3);
+    }
+
+    .note {
+      font-size: 0.95rem;
+      opacity: 0.7;
+      margin-top: 10px;
+    }
+
+    footer {
+      text-align: center;
+      padding: 20px;
+      background: rgba(15, 23, 42, 0.9);
+      font-size: 0.9rem;
+      color: #94a3b8;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1><i class="fas fa-cube"></i> Representación de Bits</h1>
+      <p class="subtitle">Primero en 2D (real) y luego en 6D (conceptual)</p>
+    </header>
+
+    <!-- PARTE REAL - 2D -->
+    <section>
+      <h2 class="section-title">🔹 Transformación Real en 2D</h2>
+      <div class="input-section">
+        <input type="number" id="bit-input" min="0" max="1" value="0" />
+        <button onclick="transform2D()">Transformar</button>
+      </div>
+      <div id="vector-result" class="vector-display">[1, 0]</div>
+      <div class="chart-box">
+        <canvas id="chart-2d"></canvas>
+      </div>
+      <p class="note">
+        Esta transformación utiliza el espacio ℝ², ampliamente usado en machine learning y redes neuronales como codificación "one-hot".
+      </p>
+    </section>
+
+    <!-- PARTE CONCEPTUAL - 6D -->
+    <section>
+      <h2 class="section-title">🧪 Hipótesis Conceptual en 6D</h2>
+      <p>
+        A continuación presentamos una expansión a 6 dimensiones como propuesta teórica que permite análisis avanzados sobre distancia, ortogonalidad y redundancia. Ideal para investigaciones futuras.
+      </p>
+      <pre class="vector-display">
+// Transformación conceptual
+bit 0 → [1, 0, 0, 0, 0, 0]
+bit 1 → [0, 1, 0, 0, 0, 0]
+
+// Propiedades:
+- Ortogonalidad perfecta: v₀ • v₁ = 0
+- Reversibilidad: argmax(vector) → bit original
+- Distancia Euclidiana: √2
+      </pre>
+      <div class="chart-box">
+        <canvas id="chart-6d"></canvas>
+      </div>
+      <p class="note">
+        Aunque no es usada en la práctica aún, esta codificación puede ser explorada en áreas como teoría de códigos, computación cuántica y compresión semántica.
+      </p>
+    </section>
+
+    <footer>
+      Proyecto de codificación multidimensional por <strong>Arnaldo Ozorio</strong>. Versión educativa y conceptual.
+    </footer>
+  </div>
+
+  <script>
+    let chart2D = null;
+    let chart6D = null;
+
+    function transform2D() {
+      const bit = parseInt(document.getElementById("bit-input").value);
+      if (bit !== 0 && bit !== 1) {
+        alert("Ingresa 0 o 1");
+        return;
+      }
+
+      const vector = bit === 0 ? [1, 0] : [0, 1];
+      document.getElementById("vector-result").textContent = `[${vector}]`;
+      renderChart2D(vector, bit);
+      renderChart6D(bit); // Mostrar versión conceptual también
+    }
+
+    function renderChart2D(vector, bit) {
+      const ctx = document.getElementById("chart-2d").getContext("2d");
+      if (chart2D) chart2D.destroy();
+      chart2D = new Chart(ctx, {
+        type: "bar",
+        data: {
+          labels: ["Dim 1", "Dim 2"],
+          datasets: [{
+            label: `Bit ${bit} en 2D`,
+            data: vector,
+            backgroundColor: bit === 0 ? "#2563ebaa" : "#ec4899aa",
+            borderColor: bit === 0 ? "#2563eb" : "#ec4899",
+            borderWidth: 1
+          }]
+        },
+        options: {
+          scales: {
+            y: {
+              beginAtZero: true,
+              suggestedMax: 1
+            }
+          }
+        }
+      });
+    }
+
+    function renderChart6D(bit) {
+      const ctx = document.getElementById("chart-6d").getContext("2d");
+      if (chart6D) chart6D.destroy();
+      const vector6D = [0, 0, 0, 0, 0, 0];
+      vector6D[bit] = 1;
+      chart6D = new Chart(ctx, {
+        type: "radar",
+        data: {
+          labels: ["D1", "D2", "D3", "D4", "D5", "D6"],
+          datasets: [{
+            label: `Bit ${bit} en 6D (hipótesis)`,
+            data: vector6D,
+            backgroundColor: bit === 0 ? "rgba(37,99,235,0.2)" : "rgba(236,72,153,0.2)",
+            borderColor: bit === 0 ? "#2563eb" : "#ec4899",
+            pointBackgroundColor: "#fff"
+          }]
+        },
+        options: {
+          elements: { line: { borderWidth: 3 } },
+          scales: {
+            r: {
+              suggestedMin: 0,
+              suggestedMax: 1
+            }
+          }
+        }
+      });
+    }
+
+    // Inicializa con bit 0
+    document.addEventListener("DOMContentLoaded", () => {
+      transform2D();
+    });
+  </script>
+</body>
+</html>
