@@ -1,29 +1,29 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Transformación de Bits - Real 2D y Conceptual 6D</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Transformación de Bits - 2D Real vs 6D Conceptual</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
     :root {
       --primary: #2563eb;
       --secondary: #7c3aed;
       --accent: #ec4899;
-      --dark: #1e293b;
-      --light: #f8fafc;
       --success: #10b981;
       --warning: #f59e0b;
-      --error: #ef4444;
+      --dark: #1e293b;
+      --light: #f8fafc;
+      --conceptual: #8b5cf6;
     }
-
+    
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
     }
-
+    
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       background: linear-gradient(135deg, #1a2a6c, #b21f1f, #1a2a6c);
@@ -33,8 +33,9 @@
       flex-direction: column;
       align-items: center;
       padding: 20px;
+      line-height: 1.6;
     }
-
+    
     .container {
       max-width: 1200px;
       width: 100%;
@@ -44,219 +45,505 @@
       overflow: hidden;
       border: 1px solid rgba(124, 58, 237, 0.3);
     }
-
+    
     header {
       text-align: center;
-      padding: 40px 20px;
+      padding: 30px 20px;
       background: linear-gradient(90deg, var(--primary), var(--secondary));
+      position: relative;
     }
-
-    h1 {
-      font-size: 2.8rem;
+    
+    header h1 {
+      font-size: 2.5rem;
       margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 15px;
     }
-
-    .subtitle {
+    
+    header .subtitle {
       font-size: 1.1rem;
       opacity: 0.9;
+      max-width: 800px;
+      margin: 0 auto;
     }
-
-    section {
-      padding: 40px;
+    
+    .content {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 30px;
+      padding: 30px;
     }
-
-    .section-title {
-      font-size: 2rem;
+    
+    @media (min-width: 900px) {
+      .content {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+    
+    .card {
+      background: rgba(15, 23, 42, 0.7);
+      border-radius: 16px;
+      padding: 25px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(124, 58, 237, 0.2);
+      transition: transform 0.3s ease;
+    }
+    
+    .card:hover {
+      transform: translateY(-5px);
+    }
+    
+    .card.real {
+      border-top: 4px solid var(--success);
+    }
+    
+    .card.conceptual {
+      border-top: 4px solid var(--conceptual);
+    }
+    
+    .card h2 {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: #93c5fd;
       margin-bottom: 20px;
-      color: var(--accent);
+      padding-bottom: 15px;
+      border-bottom: 1px solid rgba(124, 58, 237, 0.3);
+      font-size: 1.6rem;
     }
-
+    
     .input-section {
       display: flex;
       gap: 15px;
       margin-bottom: 20px;
     }
-
+    
     #bit-input {
-      padding: 14px;
-      border-radius: 10px;
-      font-size: 1.1rem;
       flex: 1;
+      padding: 12px 18px;
+      background: rgba(15, 23, 42, 0.9);
       border: 2px solid var(--primary);
-      background: var(--dark);
+      border-radius: 10px;
       color: white;
+      font-size: 1.1rem;
+      outline: none;
+      transition: all 0.3s;
     }
-
+    
+    #bit-input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(236, 72, 153, 0.3);
+    }
+    
     button {
-      padding: 14px 20px;
+      padding: 12px 25px;
       background: linear-gradient(90deg, var(--primary), var(--secondary));
       color: white;
       border: none;
       border-radius: 10px;
+      font-weight: 600;
+      font-size: 1.1rem;
       cursor: pointer;
-      font-weight: bold;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 10px;
     }
-
+    
+    button:hover {
+      opacity: 0.9;
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(124, 58, 237, 0.4);
+    }
+    
     .vector-display {
       font-family: 'Courier New', monospace;
       font-size: 1.1rem;
+      padding: 18px;
       background: rgba(15, 23, 42, 0.9);
-      padding: 15px;
       border-radius: 10px;
-      margin-top: 10px;
+      margin: 15px 0;
+      overflow-x: auto;
       border: 1px solid rgba(124, 58, 237, 0.3);
     }
-
-    .chart-box {
-      margin-top: 30px;
+    
+    .visualization {
+      height: 300px;
       background: rgba(15, 23, 42, 0.9);
-      padding: 20px;
       border-radius: 12px;
+      margin-top: 20px;
+      padding: 15px;
       border: 1px solid rgba(124, 58, 237, 0.3);
     }
-
-    .note {
-      font-size: 0.95rem;
-      opacity: 0.7;
-      margin-top: 10px;
+    
+    .properties {
+      margin: 20px 0;
+      padding: 20px;
+      background: rgba(15, 23, 42, 0.9);
+      border-radius: 10px;
+      border: 1px solid rgba(124, 58, 237, 0.3);
+      font-family: 'Courier New', monospace;
+      font-size: 1rem;
+      line-height: 1.8;
     }
-
+    
+    .comparison {
+      background: rgba(16, 185, 129, 0.1);
+      padding: 25px;
+      border-radius: 12px;
+      margin-top: 20px;
+      border: 1px solid var(--success);
+    }
+    
+    .comparison h3 {
+      color: #34d399;
+      margin-bottom: 15px;
+      font-size: 1.4rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .comparison-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+    }
+    
+    .comparison-table th, .comparison-table td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid rgba(124, 58, 237, 0.3);
+    }
+    
+    .comparison-table th {
+      color: #93c5fd;
+      font-weight: 600;
+    }
+    
+    .comparison-table tr:last-child td {
+      border-bottom: none;
+    }
+    
+    .real-badge {
+      background: rgba(16, 185, 129, 0.2);
+      color: #34d399;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-size: 0.9rem;
+    }
+    
+    .conceptual-badge {
+      background: rgba(139, 92, 246, 0.2);
+      color: #a78bfa;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-size: 0.9rem;
+    }
+    
     footer {
       text-align: center;
-      padding: 20px;
+      padding: 25px;
       background: rgba(15, 23, 42, 0.9);
-      font-size: 0.9rem;
       color: #94a3b8;
+      font-size: 1rem;
+      border-top: 1px solid rgba(124, 58, 237, 0.3);
+    }
+    
+    .author {
+      font-weight: bold;
+      color: #93c5fd;
     }
   </style>
 </head>
 <body>
   <div class="container">
     <header>
-      <h1><i class="fas fa-cube"></i> Representación de Bits</h1>
-      <p class="subtitle">Primero en 2D (real) y luego en 6D (conceptual)</p>
+      <h1><i class="fas fa-cube"></i> Transformación de Bits</h1>
+      <p class="subtitle">Implementación real en 2D y propuesta conceptual en 6D</p>
     </header>
-
-    <!-- PARTE REAL - 2D -->
-    <section>
-      <h2 class="section-title">🔹 Transformación Real en 2D</h2>
-      <div class="input-section">
-        <input type="number" id="bit-input" min="0" max="1" value="0" />
-        <button onclick="transform2D()">Transformar</button>
+    
+    <div class="content">
+      <div class="card real">
+        <h2><i class="fas fa-cube"></i> Representación Real en 2D</h2>
+        
+        <div class="input-section">
+          <input type="number" id="bit-input" min="0" max="1" value="0" placeholder="Ingresa 0 o 1">
+          <button id="transform-btn">
+            <i class="fas fa-sync-alt"></i> Transformar
+          </button>
+        </div>
+        
+        <h3>Vector 2-Dimensional:</h3>
+        <div id="vector-2d-result" class="vector-display">[1, 0]</div>
+        
+        <div class="visualization">
+          <canvas id="chart-2d"></canvas>
+        </div>
+        
+        <div class="properties">
+          // Propiedades matemáticas:
+          bit 0 → [1, 0]
+          bit 1 → [0, 1]
+          
+          • Ortogonalidad: v₀ • v₁ = 0
+          • Norma: ||v|| = 1
+          • Distancia: ||v₀ - v₁|| = √2
+          • Reversibilidad: perfecta
+        </div>
+        
+        <div class="note">
+          <p><i class="fas fa-info-circle"></i> Esta transformación utiliza el espacio ℝ², ampliamente usado en machine learning y redes neuronales como codificación "one-hot".</p>
+        </div>
       </div>
-      <div id="vector-result" class="vector-display">[1, 0]</div>
-      <div class="chart-box">
-        <canvas id="chart-2d"></canvas>
+      
+      <div class="card conceptual">
+        <h2><i class="fas fa-atom"></i> Hipótesis Conceptual en 6D</h2>
+        
+        <h3>Vector 6-Dimensional:</h3>
+        <div id="vector-6d-result" class="vector-display">[1, 0, 0, 0, 0, 0]</div>
+        
+        <div class="visualization">
+          <canvas id="chart-6d"></canvas>
+        </div>
+        
+        <div class="properties">
+          // Propiedades matemáticas:
+          bit 0 → [1, 0, 0, 0, 0, 0]
+          bit 1 → [0, 1, 0, 0, 0, 0]
+          
+          • Ortogonalidad: v₀ • v₁ = 0
+          • Norma: ||v|| = 1
+          • Distancia: ||v₀ - v₁|| = √2
+          • Reversibilidad: perfecta
+        </div>
+        
+        <div class="note">
+          <p><i class="fas fa-info-circle"></i> Aunque no es usada en la práctica aún, esta codificación puede ser explorada en áreas como teoría de códigos, computación cuántica y compresión semántica.</p>
+        </div>
       </div>
-      <p class="note">
-        Esta transformación utiliza el espacio ℝ², ampliamente usado en machine learning y redes neuronales como codificación "one-hot".
-      </p>
-    </section>
-
-    <!-- PARTE CONCEPTUAL - 6D -->
-    <section>
-      <h2 class="section-title">🧪 Hipótesis Conceptual en 6D</h2>
-      <p>
-        A continuación presentamos una expansión a 6 dimensiones como propuesta teórica que permite análisis avanzados sobre distancia, ortogonalidad y redundancia. Ideal para investigaciones futuras.
-      </p>
-      <pre class="vector-display">
-// Transformación conceptual
-bit 0 → [1, 0, 0, 0, 0, 0]
-bit 1 → [0, 1, 0, 0, 0, 0]
-
-// Propiedades:
-- Ortogonalidad perfecta: v₀ • v₁ = 0
-- Reversibilidad: argmax(vector) → bit original
-- Distancia Euclidiana: √2
-      </pre>
-      <div class="chart-box">
-        <canvas id="chart-6d"></canvas>
-      </div>
-      <p class="note">
-        Aunque no es usada en la práctica aún, esta codificación puede ser explorada en áreas como teoría de códigos, computación cuántica y compresión semántica.
-      </p>
-    </section>
-
+    </div>
+    
+    <div class="comparison">
+      <h3><i class="fas fa-balance-scale"></i> Comparación de Enfoques</h3>
+      
+      <table class="comparison-table">
+        <thead>
+          <tr>
+            <th>Característica</th>
+            <th>Transformación 2D</th>
+            <th>Transformación 6D</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Estado actual</td>
+            <td><span class="real-badge">Implementación real</span></td>
+            <td><span class="conceptual-badge">Hipótesis conceptual</span></td>
+          </tr>
+          <tr>
+            <td>Aplicaciones prácticas</td>
+            <td>Sistemas digitales, machine learning, redes neuronales</td>
+            <td>Computación cuántica, sistemas avanzados (futuro)</td>
+          </tr>
+          <tr>
+            <td>Eficiencia computacional</td>
+            <td>Óptima (2 dimensiones)</td>
+            <td>Menor eficiencia (6 dimensiones)</td>
+          </tr>
+          <tr>
+            <td>Requisitos de almacenamiento</td>
+            <td>Mínimos</td>
+            <td>3 veces mayor</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    
     <footer>
-      Proyecto de codificación multidimensional por <strong>Arnaldo Ozorio</strong>. Versión educativa y conceptual.
+      <p>Proyecto de codificación multidimensional por <span class="author">Arnaldo Ozorio</span>. Versión educativa y conceptual.</p>
     </footer>
   </div>
-
+  
   <script>
+    function transformBitTo2D(bit) {
+      return bit === 0 ? [1, 0] : [0, 1];
+    }
+    
+    function transformBitTo6D(bit) {
+      const vector = [0, 0, 0, 0, 0, 0];
+      vector[bit] = 1;
+      return vector;
+    }
+    
     let chart2D = null;
     let chart6D = null;
-
-    function transform2D() {
-      const bit = parseInt(document.getElementById("bit-input").value);
-      if (bit !== 0 && bit !== 1) {
-        alert("Ingresa 0 o 1");
-        return;
-      }
-
-      const vector = bit === 0 ? [1, 0] : [0, 1];
-      document.getElementById("vector-result").textContent = `[${vector}]`;
-      renderChart2D(vector, bit);
-      renderChart6D(bit); // Mostrar versión conceptual también
-    }
-
-    function renderChart2D(vector, bit) {
-      const ctx = document.getElementById("chart-2d").getContext("2d");
+    
+    function render2DChart(vector, bit) {
+      const ctx = document.getElementById('chart-2d').getContext('2d');
       if (chart2D) chart2D.destroy();
+      
       chart2D = new Chart(ctx, {
-        type: "bar",
+        type: 'bar',
         data: {
-          labels: ["Dim 1", "Dim 2"],
+          labels: ['Dimensión 1', 'Dimensión 2'],
           datasets: [{
             label: `Bit ${bit} en 2D`,
             data: vector,
-            backgroundColor: bit === 0 ? "#2563ebaa" : "#ec4899aa",
-            borderColor: bit === 0 ? "#2563eb" : "#ec4899",
-            borderWidth: 1
+            backgroundColor: bit === 0 ? 'rgba(37, 99, 235, 0.7)' : 'rgba(236, 72, 153, 0.7)',
+            borderColor: bit === 0 ? 'rgb(37, 99, 235)' : 'rgb(236, 72, 153)',
+            borderWidth: 2,
+            borderRadius: 6
           }]
         },
         options: {
+          responsive: true,
+          maintainAspectRatio: false,
           scales: {
             y: {
               beginAtZero: true,
-              suggestedMax: 1
+              max: 1,
+              grid: {
+                color: 'rgba(255, 255, 255, 0.1)'
+              },
+              ticks: {
+                color: '#e2e8f0',
+                font: {
+                  size: 12
+                }
+              }
+            },
+            x: {
+              grid: {
+                display: false
+              },
+              ticks: {
+                color: '#e2e8f0',
+                font: {
+                  size: 12
+                }
+              }
+            }
+          },
+          plugins: {
+            legend: {
+              labels: {
+                color: '#e2e8f0',
+                font: {
+                  size: 14
+                }
+              }
+            },
+            tooltip: {
+              backgroundColor: 'rgba(30, 41, 59, 0.9)',
+              titleColor: '#93c5fd',
+              bodyColor: '#e2e8f0',
+              borderColor: 'rgba(124, 58, 237, 0.5)',
+              borderWidth: 1
             }
           }
         }
       });
     }
-
-    function renderChart6D(bit) {
-      const ctx = document.getElementById("chart-6d").getContext("2d");
+    
+    function render6DChart(vector, bit) {
+      const ctx = document.getElementById('chart-6d').getContext('2d');
       if (chart6D) chart6D.destroy();
-      const vector6D = [0, 0, 0, 0, 0, 0];
-      vector6D[bit] = 1;
+      
       chart6D = new Chart(ctx, {
-        type: "radar",
+        type: 'radar',
         data: {
-          labels: ["D1", "D2", "D3", "D4", "D5", "D6"],
+          labels: ['Dimensión 1', 'Dimensión 2', 'Dimensión 3', 'Dimensión 4', 'Dimensión 5', 'Dimensión 6'],
           datasets: [{
-            label: `Bit ${bit} en 6D (hipótesis)`,
-            data: vector6D,
-            backgroundColor: bit === 0 ? "rgba(37,99,235,0.2)" : "rgba(236,72,153,0.2)",
-            borderColor: bit === 0 ? "#2563eb" : "#ec4899",
-            pointBackgroundColor: "#fff"
+            label: `Bit ${bit} en 6D`,
+            data: vector,
+            fill: true,
+            backgroundColor: bit === 0 ? 'rgba(37, 99, 235, 0.2)' : 'rgba(236, 72, 153, 0.2)',
+            borderColor: bit === 0 ? 'rgb(37, 99, 235)' : 'rgb(236, 72, 153)',
+            pointBackgroundColor: bit === 0 ? 'rgb(37, 99, 235)' : 'rgb(236, 72, 153)',
+            pointBorderColor: '#fff',
+            pointHoverBackgroundColor: '#fff',
+            pointHoverBorderColor: bit === 0 ? 'rgb(37, 99, 235)' : 'rgb(236, 72, 153)'
           }]
         },
         options: {
-          elements: { line: { borderWidth: 3 } },
+          responsive: true,
+          maintainAspectRatio: false,
           scales: {
             r: {
+              angleLines: {
+                color: 'rgba(255, 255, 255, 0.1)'
+              },
+              grid: {
+                color: 'rgba(255, 255, 255, 0.1)'
+              },
+              pointLabels: {
+                color: '#e2e8f0',
+                font: {
+                  size: 11
+                }
+              },
+              ticks: {
+                display: false,
+                stepSize: 0.2
+              },
               suggestedMin: 0,
               suggestedMax: 1
+            }
+          },
+          plugins: {
+            legend: {
+              labels: {
+                color: '#e2e8f0',
+                font: {
+                  size: 14
+                }
+              }
+            },
+            tooltip: {
+              backgroundColor: 'rgba(30, 41, 59, 0.9)',
+              titleColor: '#93c5fd',
+              bodyColor: '#e2e8f0',
+              borderColor: 'rgba(124, 58, 237, 0.5)',
+              borderWidth: 1
             }
           }
         }
       });
     }
-
-    // Inicializa con bit 0
-    document.addEventListener("DOMContentLoaded", () => {
-      transform2D();
+    
+    document.addEventListener('DOMContentLoaded', () => {
+      const initialBit = 0;
+      const vector2D = transformBitTo2D(initialBit);
+      const vector6D = transformBitTo6D(initialBit);
+      
+      document.getElementById('vector-2d-result').textContent = `[${vector2D.join(', ')}]`;
+      document.getElementById('vector-6d-result').textContent = `[${vector6D.join(', ')}]`;
+      
+      render2DChart(vector2D, initialBit);
+      render6DChart(vector6D, initialBit);
+      
+      document.getElementById('transform-btn').addEventListener('click', () => {
+        const bitInput = document.getElementById('bit-input').value;
+        const bit = parseInt(bitInput);
+        
+        if (bit !== 0 && bit !== 1) {
+          alert("Por favor ingresa 0 o 1");
+          return;
+        }
+        
+        const vector2D = transformBitTo2D(bit);
+        const vector6D = transformBitTo6D(bit);
+        
+        document.getElementById('vector-2d-result').textContent = `[${vector2D.join(', ')}]`;
+        document.getElementById('vector-6d-result').textContent = `[${vector6D.join(', ')}]`;
+        
+        render2DChart(vector2D, bit);
+        render6DChart(vector6D, bit);
+      });
     });
   </script>
 </body>
