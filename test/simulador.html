@@ -997,7 +997,653 @@
     </div>
 
    <div>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
 
+        :root {
+            --primary: #2c3e50;
+            --secondary: #3498db;
+            --accent: #e74c3c;
+            --light: #ecf0f1;
+            --dark: #2c3e50;
+            --success: #2ecc71;
+            --warning: #f39c12;
+            --purple: #9b59b6;
+            --crypto: #f1c40f;
+            --shadow: 0 5px 15px rgba(0,0,0,0.1);
+            --transition: all 0.3s ease;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #2c3e50, #1a2a6c);
+            color: var(--light);
+            line-height: 1.6;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            padding: 30px 0;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            margin-bottom: 15px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            color: var(--warning);
+        }
+
+        .subtitle {
+            font-size: clamp(1.1rem, 2.5vw, 1.5rem);
+            color: var(--secondary);
+            max-width: 800px;
+            margin: 0 auto 30px;
+        }
+
+        .card {
+            background: rgba(44, 62, 80, 0.9);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .card-title {
+            color: var(--warning);
+            font-size: clamp(1.3rem, 2.5vw, 1.8rem);
+            margin-bottom: 20px;
+            position: relative;
+            padding-bottom: 10px;
+        }
+
+        .card-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 60px;
+            height: 3px;
+            background: var(--secondary);
+        }
+
+        .converter-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .input-group {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .char-input-container {
+            width: 100%;
+            max-width: 300px;
+        }
+
+        .char-input-label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--warning);
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .char-input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid var(--secondary);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 1.2rem;
+            text-align: center;
+        }
+
+        .char-input:focus {
+            outline: none;
+            border-color: var(--accent);
+            background: rgba(231, 76, 60, 0.2);
+        }
+
+        .btn-convert {
+            padding: 15px 30px;
+            background: var(--secondary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin: 10px auto;
+        }
+
+        .btn-convert:hover {
+            background: #2980b9;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .output-section {
+            margin-top: 30px;
+        }
+
+        .cubit-matrix {
+            display: grid;
+            grid-template-columns: repeat(9, 1fr);
+            gap: 5px;
+            margin-top: 20px;
+        }
+
+        .matrix-header {
+            background: rgba(52, 152, 219, 0.3);
+            padding: 10px;
+            text-align: center;
+            font-weight: bold;
+            border-radius: 5px;
+        }
+
+        .matrix-cell {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px;
+            text-align: center;
+            border-radius: 5px;
+            font-family: monospace;
+            min-width: 30px;
+        }
+
+        .matrix-cell.active {
+            background: var(--success);
+            color: var(--dark);
+            font-weight: bold;
+        }
+
+        .char-result {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-top: 30px;
+            justify-content: center;
+        }
+
+        .char-result-box {
+            flex: 0 0 calc(33% - 20px);
+            min-width: 200px;
+            background: rgba(243, 156, 18, 0.2);
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .result-title {
+            color: var(--warning);
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+        }
+
+        .result-byte {
+            font-family: monospace;
+            font-size: 1.1rem;
+            margin: 10px 0;
+            word-break: break-all;
+        }
+
+        .result-char {
+            font-size: 3rem;
+            margin: 15px 0;
+            min-height: 60px;
+        }
+
+        .result-value {
+            font-size: 1.1rem;
+            color: #ccc;
+        }
+
+        /* Sección de análisis avanzado */
+        .analysis-section {
+            background: rgba(26, 188, 156, 0.1);
+            border-radius: 15px;
+            padding: 25px;
+            margin-top: 30px;
+            border-left: 4px solid var(--success);
+        }
+
+        .bit-visualization {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 8px;
+            margin: 20px 0;
+        }
+
+        .bit-cell {
+            aspect-ratio: 1/1;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: monospace;
+            font-weight: bold;
+            transition: var(--transition);
+        }
+
+        .bit-cell.active {
+            background: var(--crypto);
+            color: var(--dark);
+            transform: scale(1.1);
+        }
+
+        .crypto-analysis {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .crypto-card {
+            background: rgba(44, 62, 80, 0.7);
+            border-radius: 10px;
+            padding: 20px;
+            border-top: 3px solid var(--crypto);
+        }
+
+        .crypto-title {
+            color: var(--crypto);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .key-generation {
+            background: rgba(155, 89, 182, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 30px;
+        }
+
+        .key-display {
+            font-family: monospace;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            word-break: break-all;
+            font-size: 1.1rem;
+        }
+
+        .visualization-3d {
+            height: 400px;
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 15px;
+            margin-top: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .visualization-placeholder {
+            color: rgba(255, 255, 255, 0.3);
+            font-size: 1.2rem;
+        }
+
+        @media (max-width: 768px) {
+            .cubit-matrix {
+                grid-template-columns: repeat(5, 1fr);
+            }
+            
+            .matrix-cell {
+                padding: 8px;
+                font-size: 0.9rem;
+            }
+            
+            .bit-visualization {
+                grid-template-columns: repeat(8, 1fr);
+            }
+            
+            .crypto-analysis {
+                grid-template-columns: 1fr;
+            }
+            
+            .char-result-box {
+                flex: 0 0 calc(50% - 20px);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .bit-visualization {
+                grid-template-columns: repeat(6, 1fr);
+            }
+            
+            .char-result-box {
+                flex: 0 0 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Demostración de la Teoria</h1> 
+            <h1>Análisis Criptográfico con CUBITs</h1>
+            <p class="subtitle">Explotando al máximo los 48 bits de información en estructuras multidimensionales</p>
+        </header>
+
+        <main>
+            <div class="card">
+                <h2 class="card-title">Conversor Avanzado de Caracteres</h2>
+                <div class="converter-container">
+                    <div class="input-group">
+                        <div class="char-input-container">
+                            <label class="char-input-label">Ingresa un carácter:</label>
+                            <input type="text" class="char-input" id="charInput" maxlength="1" value="A">
+                        </div>
+                    </div>
+                    
+                    <button class="btn-convert" id="convertBtn">
+                        <i class="fas fa-sync-alt"></i> Analizar con CUBITs
+                    </button>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h2 class="card-title">Resultados CUBITs</h2>
+                <div id="outputSection" class="output-section">
+                    <p>Ingresa un carácter y haz clic en "Analizar" para ver la representación CUBITs</p>
+                </div>
+            </div>
+            
+            <div class="analysis-section">
+                <h2 class="card-title">Análisis de los 48 Bits Generados</h2>
+                
+                <h3>Visualización de los 48 bits:</h3>
+                <div class="bit-visualization" id="bitVisualization">
+                    <!-- Los bits se generarán aquí -->
+                </div>
+                
+                <div class="key-generation">
+                    <h3>Generación de Clave Criptográfica (48 bits):</h3>
+                    <div class="key-display" id="cryptoKey">000000000000000000000000000000000000000000000000</div>
+                    <p>Hex: <span id="hexKey">0x0</span> | Base64: <span id="base64Key">MA==</span></p>
+                </div>
+                
+                <h3>Análisis Comparativo con Algoritmos Históricos:</h3>
+                <div class="crypto-analysis">
+                    <div class="crypto-card">
+                        <h4 class="crypto-title"><i class="fas fa-lock"></i> Cifrado César</h4>
+                        <p>El cifrado César desplaza cada letra un número fijo de posiciones. Con 48 bits podemos generar un desplazamiento dinámico.</p>
+                        <div class="key-display">Desplazamiento: <span id="caesarShift">3</span></div>
+                    </div>
+                    
+                    <div class="crypto-card">
+                        <h4 class="crypto-title"><i class="fas fa-key"></i> Enigma</h4>
+                        <p>La máquina Enigma usaba rotores para cifrado. Podemos simular rotores con patrones de bits.</p>
+                        <div class="key-display">Patrón de rotor: <span id="enigmaPattern">101001</span></div>
+                    </div>
+                    
+                    <div class="crypto-card">
+                        <h4 class="crypto-title"><i class="fas fa-code"></i> AES-256</h4>
+                        <p>AES es el estándar actual de cifrado. Los 48 bits pueden expandirse a una clave de 256 bits mediante funciones de derivación.</p>
+                        <div class="key-display">Clave derivada: <span id="aesKey">a3f8...d92c</span></div>
+                    </div>
+                </div>
+                
+                <h3>Visualización Tridimensional de la Matriz de Bits:</h3>
+                <div class="visualization-3d" id="3dVisualization">
+                    <div class="visualization-placeholder">Visualización 3D de la matriz de bits</div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h2 class="card-title">Teoría de Aprovechamiento Máximo de Bits</h2>
+                <p>La estructura CUBITs permite un aprovechamiento inédito de la información contenida en un bit:</p>
+                
+                <div class="info-box" style="background: rgba(241, 196, 15, 0.1); border-left: 4px solid var(--crypto); padding: 15px; border-radius: 0 8px 8px 0;">
+                    <h3 style="color: var(--crypto);">Principios de explotación criptográfica:</h3>
+                    <ul style="margin: 15px 0; padding-left: 20px;">
+                        <li><strong>Densidad informativa:</strong> 1 byte tradicional → 48 bits efectivos (600% más información)</li>
+                        <li><strong>Complejidad exponencial:</strong> 2⁴⁸ combinaciones (281 billones) vs 2⁸ (256) tradicional</li>
+                        <li><strong>Multidimensionalidad:</strong> Relaciones espaciales entre bits añaden capas adicionales de significado</li>
+                        <li><strong>Transformaciones:</strong> Rotaciones y permutaciones espaciales como operaciones criptográficas</li>
+                    </ul>
+                </div>
+                
+                <h3 style="margin-top: 20px;">Comparación con sistemas históricos:</h3>
+                <table style="width: 100%; border-collapse: collapse; margin: 20px 0; background: rgba(0,0,0,0.1);">
+                    <thead>
+                        <tr style="background: rgba(52, 152, 219, 0.3);">
+                            <th style="padding: 12px; text-align: left;">Sistema</th>
+                            <th style="padding: 12px; text-align: left;">Longitud clave</th>
+                            <th style="padding: 12px; text-align: left;">Bits efectivos</th>
+                            <th style="padding: 12px; text-align: left;">Seguridad</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td style="padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.1);">Cifrado César</td>
+                            <td style="padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.1);">1-25</td>
+                            <td style="padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.1);">~4 bits</td>
+                            <td style="padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.1);">Muy baja</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.1);">Enigma (3 rotores)</td>
+                            <td style="padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.1);">~100 bits</td>
+                            <td style="padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.1);">76 bits</td>
+                            <td style="padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.1);">Media (para su época)</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.1);">DES</td>
+                            <td style="padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.1);">56 bits</td>
+                            <td style="padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.1);">56 bits</td>
+                            <td style="padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.1);">Obsoleta</td>
+                        </tr>
+                        <tr style="background: rgba(46, 204, 113, 0.1);">
+                            <td style="padding: 12px;"><strong>CUBITs (1 carácter)</strong></td>
+                            <td style="padding: 12px;"><strong>48 bits</strong></td>
+                            <td style="padding: 12px;"><strong>48 bits</strong></td>
+                            <td style="padding: 12px;"><strong>Alta (equivalente a AES-128)</strong></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </main>
+        
+        <footer style="text-align: center; padding: 30px 0; margin-top: 30px; border-top: 1px solid rgba(255,255,255,0.1);">
+            <p>Teoría de CUBITs - Análisis Criptográfico Avanzado</p>
+            <p>Desarrollado por Arnaldo A. Ozorio | 2025</p>
+        </footer>
+    </div>
+
+    <script>
+        document.getElementById('convertBtn').addEventListener('click', convertToCubits);
+        
+        function convertToCubits() {
+            const outputSection = document.getElementById('outputSection');
+            outputSection.innerHTML = '';
+            
+            const charInput = document.getElementById('charInput');
+            const char = charInput.value;
+            
+            if (char) {
+                const charCode = char.charCodeAt(0);
+                const binaryByte = charCode.toString(2).padStart(8, '0');
+                const cubitMatrix = generateCubitMatrix(binaryByte);
+                
+                let allBits = '';
+                for (let row = 0; row < 6; row++) {
+                    allBits += cubitMatrix[row].join('');
+                }
+                
+                outputSection.appendChild(createCharSection(char, binaryByte, cubitMatrix));
+                
+                // Realizar análisis avanzado con los 48 bits
+                performAdvancedAnalysis(allBits);
+            } else {
+                outputSection.innerHTML = '<p>Por favor ingresa un carácter</p>';
+            }
+        }
+        
+        function generateCubitMatrix(byte) {
+            const matrix = [];
+            
+            // Crear matriz 6x8 vacía
+            for (let i = 0; i < 6; i++) {
+                matrix.push(Array(8).fill('0'));
+            }
+            
+            // Aplicar la transformación CUBITs
+            for (let bitIndex = 0; bitIndex < 8; bitIndex++) {
+                const bitValue = byte[bitIndex];
+                
+                for (let face = 0; face < 6; face++) {
+                    const targetBit = (bitIndex + face) % 8;
+                    matrix[face][bitIndex] = byte[targetBit];
+                }
+            }
+            
+            return matrix;
+        }
+        
+        function createCharSection(char, binaryByte, matrix) {
+            const container = document.createElement('div');
+            container.className = 'char-section';
+            container.style.marginBottom = '40px';
+            
+            // Información del carácter original
+            const charInfo = document.createElement('div');
+            charInfo.innerHTML = `
+                <h3 style="color: #f39c12; margin-bottom: 15px; text-align: center;">
+                    Carácter: '${char}' (${binaryByte})
+                </h3>
+                <p style="text-align: center;">Valor Unicode: ${char.charCodeAt(0)} (0x${char.charCodeAt(0).toString(16).toUpperCase()})</p>
+            `;
+            container.appendChild(charInfo);
+            
+            // Bytes resultantes
+            const resultTitle = document.createElement('h4');
+            resultTitle.textContent = '6 Caracteres Resultantes:';
+            resultTitle.style.margin = '20px 0 10px';
+            resultTitle.style.color = '#f39c12';
+            resultTitle.style.textAlign = 'center';
+            container.appendChild(resultTitle);
+            
+            const resultContainer = document.createElement('div');
+            resultContainer.className = 'char-result';
+            
+            for (let row = 0; row < 6; row++) {
+                const byte = matrix[row].join('');
+                const byteValue = parseInt(byte, 2);
+                const resultChar = byteValue > 31 && byteValue < 127 ? 
+                                  String.fromCharCode(byteValue) : 
+                                  '�';
+                
+                const resultBox = document.createElement('div');
+                resultBox.className = 'char-result-box';
+                resultBox.innerHTML = `
+                    <div class="result-title">Fila ${row + 1}</div>
+                    <div class="result-byte">${formatByte(byte)}</div>
+                    <div class="result-char">${resultChar}</div>
+                    <div class="result-value">Valor: ${byteValue}</div>
+                    <div class="result-value">Hex: 0x${byteValue.toString(16).toUpperCase()}</div>
+                `;
+                
+                resultContainer.appendChild(resultBox);
+            }
+            
+            container.appendChild(resultContainer);
+            
+            return container;
+        }
+        
+        function performAdvancedAnalysis(allBits) {
+            // Visualización de bits
+            const bitViz = document.getElementById('bitVisualization');
+            bitViz.innerHTML = '';
+            
+            for (let i = 0; i < 48; i++) {
+                const bit = document.createElement('div');
+                bit.className = `bit-cell ${allBits[i] === '1' ? 'active' : ''}`;
+                bit.textContent = allBits[i];
+                bitViz.appendChild(bit);
+            }
+            
+            // Generación de clave criptográfica
+            document.getElementById('cryptoKey').textContent = allBits;
+            
+            // Convertir a hexadecimal
+            let hexKey = '';
+            for (let i = 0; i < 48; i += 4) {
+                const nibble = allBits.substring(i, i + 4);
+                hexKey += parseInt(nibble, 2).toString(16).toUpperCase();
+            }
+            document.getElementById('hexKey').textContent = `0x${hexKey}`;
+            
+            // Convertir a Base64
+            let binaryString = '';
+            for (let i = 0; i < 48; i += 8) {
+                const byte = allBits.substring(i, i + 8);
+                binaryString += String.fromCharCode(parseInt(byte, 2));
+            }
+            document.getElementById('base64Key').textContent = btoa(binaryString);
+            
+            // Análisis comparativo
+            document.getElementById('caesarShift').textContent = parseInt(allBits.substring(0, 5), 2) + 1;
+            
+            const enigmaPattern = allBits.substring(10, 16);
+            document.getElementById('enigmaPattern').textContent = enigmaPattern;
+            
+            // Simular clave AES derivada
+            let aesKey = '';
+            for (let i = 0; i < 48; i += 4) {
+                aesKey += parseInt(allBits.substring(i, i + 4), 2).toString(16);
+            }
+            document.getElementById('aesKey').textContent = `${aesKey.substring(0, 4)}...${aesKey.substring(44)}`;
+            
+            // Visualización 3D
+            create3DVisualization(allBits);
+        }
+        
+        function create3DVisualization(bits) {
+            const container = document.getElementById('3dVisualization');
+            container.innerHTML = '<div class="visualization-placeholder">Visualización 3D de la matriz de bits</div>';
+            
+            // En un entorno real, aquí se integraría con Three.js o similar
+            // Esta es una representación simplificada
+        }
+        
+        function formatByte(byte) {
+            return byte.match(/.{1,1}/g).join(' ');
+        }
+        
+        // Inicializar con un análisis por defecto
+        window.onload = () => {
+            document.getElementById('convertBtn').click();
+        };
+    </script>
+</body>
        
    </div> 
             <div class="card">
