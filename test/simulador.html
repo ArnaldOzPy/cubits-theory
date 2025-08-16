@@ -994,6 +994,345 @@
                 </div>
                 <div class="row-bytes-display" id="rowBytesDisplay"></div>
             </div>
+    </div>
+
+   <!-- DIV para el conversor de caracteres a CUBITs -->
+<div class="card">
+    <h2 class="card-title">Conversor de Caracteres a CUBITs</h2>
+    <div class="converter-container">
+        <div class="input-group">
+            <div class="char-input-container">
+                <label class="char-input-label">Carácter 1:</label>
+                <input type="text" class="char-input" id="char1" maxlength="1" placeholder="Ingresa un carácter">
+            </div>
+            <div class="char-input-container">
+                <label class="char-input-label">Carácter 2:</label>
+                <input type="text" class="char-input" id="char2" maxlength="1" placeholder="Ingresa un carácter">
+            </div>
+            <div class="char-input-container">
+                <label class="char-input-label">Carácter 3:</label>
+                <input type="text" class="char-input" id="char3" maxlength="1" placeholder="Ingresa un carácter">
+            </div>
+        </div>
+        
+        <button class="btn-convert" id="convertBtn">
+            <i class="fas fa-sync-alt"></i> Convertir a CUBITs
+        </button>
+    </div>
+    
+    <div id="outputSection" class="output-section">
+        <p>Ingresa caracteres y haz clic en "Convertir" para ver la representación CUBITs</p>
+    </div>
+</div>
+
+<!-- CSS necesario para el conversor -->
+<style>
+    .converter-container {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        margin-top: 20px;
+    }
+
+    .input-group {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 15px;
+        margin-bottom: 20px;
+    }
+
+    .char-input-container {
+        flex: 1;
+        min-width: 200px;
+    }
+
+    .char-input-label {
+        display: block;
+        margin-bottom: 8px;
+        color: #f39c12;
+        font-weight: bold;
+    }
+
+    .char-input {
+        width: 100%;
+        padding: 12px;
+        border: 2px solid #3498db;
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.1);
+        color: white;
+        font-size: 1.2rem;
+        text-align: center;
+    }
+
+    .char-input:focus {
+        outline: none;
+        border-color: #e74c3c;
+        background: rgba(231, 76, 60, 0.2);
+    }
+
+    .btn-convert {
+        padding: 15px 30px;
+        background: #3498db;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 1.1rem;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        margin: 10px auto;
+    }
+
+    .btn-convert:hover {
+        background: #2980b9;
+        transform: translateY(-3px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+
+    .output-section {
+        margin-top: 30px;
+    }
+
+    .cubit-matrix {
+        display: grid;
+        grid-template-columns: repeat(9, 1fr);
+        gap: 5px;
+        margin-top: 20px;
+    }
+
+    .matrix-header {
+        background: rgba(52, 152, 219, 0.3);
+        padding: 10px;
+        text-align: center;
+        font-weight: bold;
+        border-radius: 5px;
+    }
+
+    .matrix-cell {
+        background: rgba(255, 255, 255, 0.1);
+        padding: 10px;
+        text-align: center;
+        border-radius: 5px;
+        font-family: monospace;
+        min-width: 30px;
+    }
+
+    .matrix-cell.active {
+        background: #2ecc71;
+        color: #2c3e50;
+        font-weight: bold;
+    }
+
+    .byte-result {
+        background: rgba(155, 89, 182, 0.3);
+        padding: 10px;
+        text-align: center;
+        border-radius: 5px;
+        font-family: monospace;
+        margin-top: 3px;
+    }
+
+    .char-result {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+        margin-top: 30px;
+    }
+
+    .char-result-box {
+        flex: 1;
+        min-width: 200px;
+        background: rgba(243, 156, 18, 0.2);
+        border-radius: 10px;
+        padding: 20px;
+        text-align: center;
+    }
+
+    .result-title {
+        color: #f39c12;
+        font-size: 1.2rem;
+        margin-bottom: 15px;
+    }
+
+    .result-byte {
+        font-family: monospace;
+        font-size: 1.1rem;
+        margin: 10px 0;
+        word-break: break-all;
+    }
+
+    .result-char {
+        font-size: 3rem;
+        margin: 15px 0;
+        min-height: 60px;
+    }
+
+    .result-value {
+        font-size: 1.1rem;
+        color: #ccc;
+    }
+
+    @media (max-width: 768px) {
+        .cubit-matrix {
+            grid-template-columns: repeat(5, 1fr);
+        }
+        
+        .matrix-cell {
+            padding: 8px;
+            font-size: 0.9rem;
+        }
+    }
+</style>
+
+<!-- JavaScript para el conversor -->
+<script>
+    document.getElementById('convertBtn').addEventListener('click', convertToCubits);
+    
+    function convertToCubits() {
+        const outputSection = document.getElementById('outputSection');
+        outputSection.innerHTML = '';
+        
+        for (let i = 1; i <= 3; i++) {
+            const charInput = document.getElementById(`char${i}`);
+            const char = charInput.value;
+            
+            if (char) {
+                const charCode = char.charCodeAt(0);
+                const binaryByte = charCode.toString(2).padStart(8, '0');
+                const cubitMatrix = generateCubitMatrix(binaryByte);
+                
+                outputSection.appendChild(createCharSection(char, binaryByte, cubitMatrix, i));
+            }
+        }
+        
+        if (outputSection.innerHTML === '') {
+            outputSection.innerHTML = '<p>Por favor ingresa al menos un carácter</p>';
+        }
+    }
+    
+    function generateCubitMatrix(byte) {
+        const matrix = [];
+        
+        // Crear matriz 6x8 vacía
+        for (let i = 0; i < 6; i++) {
+            matrix.push(Array(8).fill('0'));
+        }
+        
+        // Aplicar la transformación CUBITs
+        for (let bitIndex = 0; bitIndex < 8; bitIndex++) {
+            const bitValue = byte[bitIndex];
+            
+            for (let face = 0; face < 6; face++) {
+                const targetBit = (bitIndex + face) % 8;
+                matrix[face][bitIndex] = byte[targetBit];
+            }
+        }
+        
+        return matrix;
+    }
+    
+    function createCharSection(char, binaryByte, matrix, index) {
+        const container = document.createElement('div');
+        container.className = 'char-section';
+        container.style.marginBottom = '40px';
+        
+        // Información del carácter original
+        const charInfo = document.createElement('div');
+        charInfo.innerHTML = `
+            <h3 style="color: ${getColorForIndex(index)}; margin-bottom: 15px;">
+                Carácter ${index}: '${char}' (${binaryByte})
+            </h3>
+            <p>Valor Unicode: ${char.charCodeAt(0)} (0x${char.charCodeAt(0).toString(16).toUpperCase()})</p>
+        `;
+        container.appendChild(charInfo);
+        
+        // Matriz CUBITs
+        const matrixTitle = document.createElement('h4');
+        matrixTitle.textContent = 'Matriz CUBITs (6 filas × 8 columnas):';
+        matrixTitle.style.margin = '20px 0 10px';
+        matrixTitle.style.color = '#f39c12';
+        container.appendChild(matrixTitle);
+        
+        const matrixContainer = document.createElement('div');
+        matrixContainer.className = 'cubit-matrix';
+        
+        // Encabezados de columna
+        const emptyHeader = document.createElement('div');
+        emptyHeader.className = 'matrix-header';
+        matrixContainer.appendChild(emptyHeader);
+        
+        for (let col = 0; col < 8; col++) {
+            const colHeader = document.createElement('div');
+            colHeader.className = 'matrix-header';
+            colHeader.textContent = `Bit ${col + 1}`;
+            matrixContainer.appendChild(colHeader);
+        }
+        
+        // Filas de la matriz
+        for (let row = 0; row < 6; row++) {
+            const rowHeader = document.createElement('div');
+            rowHeader.className = 'matrix-header';
+            rowHeader.textContent = `Fila ${row + 1}`;
+            matrixContainer.appendChild(rowHeader);
+            
+            for (let col = 0; col < 8; col++) {
+                const cell = document.createElement('div');
+                cell.className = `matrix-cell ${matrix[row][col] === '1' ? 'active' : ''}`;
+                cell.textContent = matrix[row][col];
+                matrixContainer.appendChild(cell);
+            }
+        }
+        
+        container.appendChild(matrixContainer);
+        
+        // Bytes resultantes
+        const resultTitle = document.createElement('h4');
+        resultTitle.textContent = 'Bytes Resultantes (6 caracteres de salida):';
+        resultTitle.style.margin = '25px 0 10px';
+        resultTitle.style.color = '#f39c12';
+        container.appendChild(resultTitle);
+        
+        const resultContainer = document.createElement('div');
+        resultContainer.className = 'char-result';
+        
+        for (let row = 0; row < 6; row++) {
+            const byte = matrix[row].join('');
+            const byteValue = parseInt(byte, 2);
+            const resultChar = byteValue > 31 && byteValue < 127 ? 
+                              String.fromCharCode(byteValue) : 
+                              '�';
+            
+            const resultBox = document.createElement('div');
+            resultBox.className = 'char-result-box';
+            resultBox.innerHTML = `
+                <div class="result-title">Fila ${row + 1}</div>
+                <div class="result-byte">${formatByte(byte)}</div>
+                <div class="result-char">${resultChar}</div>
+                <div class="result-value">Valor: ${byteValue}</div>
+                <div class="result-value">Hex: 0x${byteValue.toString(16).toUpperCase()}</div>
+            `;
+            
+            resultContainer.appendChild(resultBox);
+        }
+        
+        container.appendChild(resultContainer);
+        
+        return container;
+    }
+    
+    function formatByte(byte) {
+        return byte.match(/.{1,1}/g).join(' ');
+    }
+    
+    function getColorForIndex(index) {
+        const colors = ['#3498db', '#e74c3c', '#2ecc71'];
+        return colors[(index-1) % colors.length];
+    }
+</script> 
             
             <div class="card">
                 <h2 class="card-title">Aplicaciones Conceptuales</h2>
