@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Procesador de Texto CUBITs Web</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --accent-color: #e74c3c;
+            --light-color: #ecf0f1;
+            --dark-color: #34495e;
+            --success-color: #2ecc71;
+            --warning-color: #f39c12;
+            --text-color: #333;
+            --bg-color: #f9f9f9;
+            --menu-bg: #2c3e50;
+            --menu-text: #fff;
+            --editor-bg: #fff;
+            --editor-border: #ddd;
+            --status-bg: #eee;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .menu-bar {
+            background-color: var(--menu-bg);
+            color: var(--menu-text);
+            padding: 10px;
+            display: flex;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            z-index: 100;
+        }
+
+        .menu-bar button {
+            background: none;
+            border: none;
+            color: var(--menu-text);
+            padding: 8px 12px;
+            margin-right: 5px;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+
+        .menu-bar button:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .menu-bar .menu-title {
+            margin-right: 20px;
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        .menu-bar .menu-divider {
+            width: 1px;
+            height: 20px;
+            background-color: rgba(255, 255, 255, 0.3);
+            margin: 0 10px;
+        }
+
+        .container {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .editor-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            overflow: hidden;
+        }
+
+        .editor-header {
+            margin-bottom: 15px;
+        }
+
+        .text-editor {
+            flex: 1;
+            border: 1px solid var(--editor-border);
+            border-radius: 4px;
+            padding: 15px;
+            background-color: var(--editor-bg);
+            resize: none;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.5;
+            overflow: auto;
+        }
+
+        .status-bar {
+            background-color: var(--status-bg);
+            padding: 8px 15px;
+            font-size: 12px;
+            border-top: 1px solid var(--editor-border);
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background-color: var(--editor-bg);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            width: 90%;
+            max-width: 500px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--editor-border);
+        }
+
+        .modal-title {
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        .close-button {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: var(--dark-color);
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid var(--editor-border);
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .button-group {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 20px;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background-color 0.3s;
+        }
+
+        .btn-primary {
+            background-color: var(--secondary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #2980b9;
+        }
+
+        .btn-secondary {
+            background-color: var(--light-color);
+            color: var(--text-color);
+        }
+
+        .btn-secondary:hover {
+            background-color: #dde4e6;
+        }
+
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .stat-box {
+            background-color: var(--light-color);
+            padding: 10px;
+            border-radius: 4px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 18px;
+            font-weight: bold;
+            color: var(--secondary-color);
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: var(--dark-color);
+        }
+
+        @media (max-width: 768px) {
+            .menu-bar {
+                flex-wrap: wrap;
+            }
+            
+            .stats-container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Barra de menú -->
+    <div class="menu-bar">
+        <div class="menu-title">CUBITs Web</div>
+        <div class="menu-divider"></div>
+        <button id="btn-new">Nuevo</button>
+        <button id="btn-open">Abrir</button>
+        <button id="btn-save">Guardar</button>
+        <button id="btn-saveas">Guardar como</button>
+        <div class="menu-divider"></div>
+        <button id="btn-metadata">Metadatos</button>
+        <button id="btn-stats">Estadísticas</button>
+        <div class="menu-divider"></div>
+        <button id="btn-about">Acerca de</button>
+    </div>
+
+    <!-- Contenedor principal -->
+    <div class="container">
+        <div class="editor-container">
+            <div class="editor-header">
+                <h2>Editor de Texto CUBITs</h2>
+            </div>
+            <textarea id="text-editor" class="text-editor" placeholder="Escribe tu texto aquí..."></textarea>
+        </div>
+    </div>
+
+    <!-- Barra de estado -->
+    <div class="status-bar">
+        <div id="status-message">Listo</div>
+        <div id="file-info">Documento sin título</div>
+    </div>
+
+    <!-- Modal para metadatos -->
+    <div id="metadata-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">Metadatos del Documento</div>
+                <button class="close-button">&times;</button>
+            </div>
+            <div class="form-group">
+                <label for="metadata-title">Título:</label>
+                <input type="text" id="metadata-title" placeholder="Título del documento">
+            </div>
+            <div class="form-group">
+                <label for="metadata-author">Autor:</label>
+                <input type="text" id="metadata-author" placeholder="Nombre del autor">
+            </div>
+            <div class="form-group">
+                <label for="metadata-desc">Descripción:</label>
+                <textarea id="metadata-desc" rows="3" placeholder="Descripción del documento"></textarea>
+            </div>
+            <div class="form-group">
+                <label for="metadata-tags">Etiquetas (separadas por comas):</label>
+                <input type="text" id="metadata-tags" placeholder="etiqueta1, etiqueta2, etiqueta3">
+            </div>
+            <div class="button-group">
+                <button id="btn-metadata-cancel" class="btn btn-secondary">Cancelar</button>
+                <button id="btn-metadata-save" class="btn btn-primary">Guardar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para estadísticas -->
+    <div id="stats-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">Estadísticas del Documento</div>
+                <button class="close-button">&times;</button>
+            </div>
+            <div class="stats-container">
+                <div class="stat-box">
+                    <div class="stat-value" id="stat-chars">0</div>
+                    <div class="stat-label">Caracteres</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value" id="stat-words">0</div>
+                    <div class="stat-label">Palabras</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value" id="stat-lines">0</div>
+                    <div class="stat-label">Líneas</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value" id="stat-size">0</div>
+                    <div class="stat-label">Tamaño (bytes)</div>
+                </div>
+            </div>
+            <div class="button-group">
+                <button id="btn-stats-close" class="btn btn-primary">Cerrar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal acerca de -->
+    <div id="about-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">Acerca de CUBITs Web</div>
+                <button class="close-button">&times;</button>
+            </div>
+            <div style="margin-bottom: 20px;">
+                <p><strong>Procesador de Texto CUBITs v1.0</strong></p>
+                <p>Sistema avanzado de procesamiento de texto que utiliza la tecnología CUBITs para almacenamiento multidimensional de información.</p>
+            </div>
+            <div style="margin-bottom: 20px;">
+                <p><strong>Características:</strong></p>
+                <ul style="padding-left: 20px; margin-bottom: 15px;">
+                    <li>Almacenamiento de metadatos integrados</li>
+                    <li>Compresión optimizada con transformación CUBITs</li>
+                    <li>Interfaz intuitiva similar a WordPad</li>
+                    <li>Formato .cub para documentos enriquecidos</li>
+                </ul>
+                <p>Desarrollado para demostrar el potencial de la tecnología CUBITs en el procesamiento de documentos.</p>
+            </div>
+            <div class="button-group">
+                <button id="btn-about-close" class="btn btn-primary">Cerrar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Input oculto para cargar archivos -->
+    <input type="file" id="file-input" style="display: none;" accept=".cub">
+
+    <script>
+        // Implementación de las funciones CUBITs en JavaScript
+        class CubitsTextProcessor {
+            constructor() {
+                this.currentFile = null;
+                this.metadata = {
+                    title: "Documento sin título",
+                    author: "",
+                    description: "",
+                    tags: [],
+                    created: new Date().toISOString(),
+                    modified: new Date().toISOString(),
+                    version: "1.0"
+                };
+            }
+
+            generateCubitsMatrix(byteVal) {
+                const binaryByte = byteVal.toString(2).padStart(8, '0');
+                const matrix = [];
+                
+                for (let i = 0; i < 6; i++) {
+                    let row = '';
+                    for (let j = 0; j < 8; j++) {
+                        const targetPos = (j + i) % 8;
+                        row += binaryByte[targetPos];
+                    }
+                    matrix.push(row);
+                }
+                
+                return matrix;
+            }
+
+            optimizeCubitsSequence(matrix) {
+                const optimizedBytes = [];
+                let bitAccumulator = "";
+                
+                for (const row of matrix) {
+                    const rowValue = parseInt(row, 2);
+                    
+                    if (rowValue >= 32 && rowValue <= 126) {
+                        optimizedBytes.push(rowValue);
+                    } else {
+                        bitAccumulator += row;
+                        
+                        while (bitAccumulator.length >= 8) {
+                            const byteBits = bitAccumulator.substring(0, 8);
+                            const byteVal = parseInt(byteBits, 2);
+                            
+                            if (byteVal >= 32 && byteVal <= 126) {
+                                optimizedBytes.push(byteVal);
+                            } else {
+                                // Codificación especial para valores no imprimibles
+                                optimizedBytes.push(92, 120, ...this.byteToHex(byteVal));
+                            }
+                            
+                            bitAccumulator = bitAccumulator.substring(8);
+                        }
+                    }
+                }
+                
+                if (bitAccumulator.length > 0) {
+                    const paddedBits = bitAccumulator.padEnd(8, '0');
+                    const byteVal = parseInt(paddedBits, 2);
+                    if (byteVal >= 32 && byteVal <= 126) {
+                        optimizedBytes.push(byteVal);
+                    } else {
+                        optimizedBytes.push(92, 120, ...this.byteToHex(byteVal));
+                    }
+                }
+                
+                return new Uint8Array(optimizedBytes);
+            }
+
+            byteToHex(byteVal) {
+                const hex = byteVal.toString(16).padStart(2, '0');
+                return [hex.charCodeAt(0), hex.charCodeAt(1)];
+            }
+
+            encodeToCubits(text, metadata = null) {
+                if (metadata) {
+                    this.metadata = {...this.metadata, ...metadata};
+                }
+                
+                this.metadata.modified = new Date().toISOString();
+                
+                // Convertir metadatos a bytes
+                const metadataStr = JSON.stringify(this.metadata);
+                const metadataBytes = new TextEncoder().encode(metadataStr);
+                
+                // Codificar texto con optimización CUBITs
+                const encodedData = [];
+                for (let i = 0; i < text.length; i++) {
+                    const byteVal = text.charCodeAt(i);
+                    const matrix = this.generateCubitsMatrix(byteVal);
+                    const optimized = this.optimizeCubitsSequence(matrix);
+                    encodedData.push(...optimized);
+                }
+                
+                // Combinar metadatos y contenido
+                const metaLength = metadataBytes.length;
+                const combined = new Uint8Array([
+                    ...this.intToBytes(metaLength),
+                    ...metadataBytes,
+                    ...encodedData
+                ]);
+                
+                // Comprimir (simulación con btoa para simplificar)
+                const compressed = btoa(String.fromCharCode(...combined));
+                
+                return compressed;
+            }
+
+            decodeFromCubits(cubitsData) {
+                try {
+                    // Decodificar base64
+                    const decoded = atob(cubitsData);
+                    const decodedBytes = new Uint8Array(decoded.length);
+                    for (let i = 0; i < decoded.length; i++) {
+                        decodedBytes[i] = decoded.charCodeAt(i);
+                    }
+                    
+                    // Extraer metadatos
+                    const metaLength = this.bytesToInt(decodedBytes.slice(0, 4));
+                    const metadataStr = new TextDecoder().decode(decodedBytes.slice(4, 4 + metaLength));
+                    const metadata = JSON.parse(metadataStr);
+                    
+                    // Decodificar contenido
+                    const contentData = decodedBytes.slice(4 + metaLength);
+                    const decodedText = this.decodeCubitsContent(contentData);
+                    
+                    return { text: decodedText, metadata };
+                } catch (e) {
+                    return { text: `Error decodificando: ${e.message}`, metadata: {} };
+                }
+            }
+
+            decodeCubitsContent(contentData) {
+                let decodedText = "";
+                let i = 0;
+                
+                while (i < contentData.length) {
+                    if (contentData[i] === 92 && i + 3 < contentData.length && contentData[i + 1] === 120) {
+                        // Es una secuencia especial \xHH
+                        const hexStr = String.fromCharCode(contentData[i + 2], contentData[i + 3]);
+                        const specialVal = parseInt(hexStr, 16);
+                        decodedText += String.fromCharCode(specialVal);
+                        i += 4;
+                    } else {
+                        // Carácter normal
+                        decodedText += String.fromCharCode(contentData[i]);
+                        i += 1;
+                    }
+                }
+                
+                return decodedText;
+            }
+
+            intToBytes(num) {
+                const arr = new Uint8Array(4);
+                for (let i = 3; i >= 0; i--) {
+                    arr[i] = num & 0xff;
+                    num = num >> 8;
+                }
+                return arr;
+            }
+
+            bytesToInt(bytes) {
+                let value = 0;
+                for (let i = 0; i < 4; i++) {
+                    value = (value << 8) | bytes[i];
+                }
+                return value;
+            }
+        }
+
+        // Instancia global del procesador
+        const processor = new CubitsTextProcessor();
+
+        // Elementos de la interfaz
+        const textEditor = document.getElementById('text-editor');
+        const statusMessage = document.getElementById('status-message');
+        const fileInfo = document.getElementById('file-info');
+        const fileInput = document.getElementById('file-input');
+
+        // Modales
+        const metadataModal = document.getElementById('metadata-modal');
+        const statsModal = document.getElementById('stats-modal');
+        const aboutModal = document.getElementById('about-modal');
+
+        // Configuración de eventos
+        document.getElementById('btn-new').addEventListener('click', newFile);
+        document.getElementById('btn-open').addEventListener('click', openFile);
+        document.getElementById('btn-save').addEventListener('click', saveFile);
+        document.getElementById('btn-saveas').addEventListener('click', saveAsFile);
+        document.getElementById('btn-metadata').addEventListener('click', showMetadata);
+        document.getElementById('btn-stats').addEventListener('click', showStats);
+        document.getElementById('btn-about').addEventListener('click', showAbout);
+
+        // Eventos para cerrar modales
+        document.querySelectorAll('.close-button').forEach(btn => {
+            btn.addEventListener('click', () => {
+                metadataModal.style.display = 'none';
+                statsModal.style.display = 'none';
+                aboutModal.style.display = 'none';
+            });
+        });
+
+        document.getElementById('btn-metadata-cancel').addEventListener('click', () => {
+            metadataModal.style.display = 'none';
+        });
+
+        document.getElementById('btn-metadata-save').addEventListener('click', saveMetadata);
+        document.getElementById('btn-stats-close').addEventListener('click', () => {
+            statsModal.style.display = 'none';
+        });
+        document.getElementById('btn-about-close').addEventListener('click', () => {
+            aboutModal.style.display = 'none';
+        });
+
+        // Cargar archivo
+        fileInput.addEventListener('change', handleFileSelect);
+
+        // Funciones de la aplicación
+        function newFile() {
+            if (textEditor.value && confirm("¿Desea guardar el documento actual?")) {
+                saveFile();
+            }
+            textEditor.value = '';
+            processor.currentFile = null;
+            processor.metadata = {
+                title: "Documento sin título",
+                author: "",
+                description: "",
+                tags: [],
+                created: new Date().toISOString(),
+                modified: new Date().toISOString(),
+                version: "1.0"
+            };
+            updateFileInfo();
+            statusMessage.textContent = "Nuevo documento creado";
+        }
+
+        function openFile() {
+            fileInput.click();
+        }
+
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const content = e.target.result;
+                    const result = processor.decodeFromCubits(content);
+                    
+                    textEditor.value = result.text;
+                    processor.metadata = result.metadata;
+                    processor.currentFile = file.name;
+                    
+                    updateFileInfo();
+                    statusMessage.textContent = `Documento cargado: ${file.name}`;
+                } catch (error) {
+                    statusMessage.textContent = `Error al cargar el archivo: ${error.message}`;
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function saveFile() {
+            if (!processor.currentFile) {
+                saveAsFile();
+                return;
+            }
+            
+            const text = textEditor.value;
+            const cubitsData = processor.encodeToCubits(text);
+            
+            // Crear un blob y descargar
+            const blob = new Blob([cubitsData], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = processor.currentFile;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            statusMessage.textContent = `Documento guardado: ${processor.currentFile}`;
+        }
+
+        function saveAsFile() {
+            const text = textEditor.value;
+            const cubitsData = processor.encodeToCubits(text);
+            
+            // Solicitar nombre de archivo
+            const fileName = prompt("Nombre del archivo:", processor.currentFile || "documento.cub") || "documento.cub";
+            
+            // Crear un blob y descargar
+            const blob = new Blob([cubitsData], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = fileName.endsWith('.cub') ? fileName : fileName + '.cub';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            processor.currentFile = a.download;
+            updateFileInfo();
+            statusMessage.textContent = `Documento guardado: ${a.download}`;
+        }
+
+        function showMetadata() {
+            document.getElementById('metadata-title').value = processor.metadata.title || '';
+            document.getElementById('metadata-author').value = processor.metadata.author || '';
+            document.getElementById('metadata-desc').value = processor.metadata.description || '';
+            document.getElementById('metadata-tags').value = processor.metadata.tags ? processor.metadata.tags.join(', ') : '';
+            metadataModal.style.display = 'flex';
+        }
+
+        function saveMetadata() {
+            processor.metadata.title = document.getElementById('metadata-title').value;
+            processor.metadata.author = document.getElementById('metadata-author').value;
+            processor.metadata.description = document.getElementById('metadata-desc').value;
+            processor.metadata.tags = document.getElementById('metadata-tags').value
+                .split(',')
+                .map(tag => tag.trim())
+                .filter(tag => tag !== '');
+                
+            metadataModal.style.display = 'none';
+            updateFileInfo();
+            statusMessage.textContent = "Metadatos actualizados";
+        }
+
+        function showStats() {
+            const text = textEditor.value;
+            document.getElementById('stat-chars').textContent = text.length;
+            document.getElementById('stat-words').textContent = text.split(/\s+/).filter(word => word.length > 0).length;
+            document.getElementById('stat-lines').textContent = text.split('\n').length;
+            document.getElementById('stat-size').textContent = new TextEncoder().encode(text).length;
+            statsModal.style.display = 'flex';
+        }
+
+        function showAbout() {
+            aboutModal.style.display = 'flex';
+        }
+
+        function updateFileInfo() {
+            fileInfo.textContent = processor.metadata.title || (processor.currentFile || "Documento sin título");
+        }
+
+        // Inicialización
+        updateFileInfo();
+        statusMessage.textContent = "Listo";
+    </script>
+</body>
+</html>
