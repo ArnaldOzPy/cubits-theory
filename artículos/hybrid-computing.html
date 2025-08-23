@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interfaz Clásico-Cuántica</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #2563eb;
+            --quantum: #06b6d4;
+            --classic: #10b981;
+            --accent: #ec4899;
+            --dark: #1e293b;
+            --light: #f8fafc;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0c4a6e, #1e40af, #0c4a6e);
+            color: var(--light);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            width: 100%;
+            background: rgba(30, 41, 59, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
+            overflow: hidden;
+            border: 1px solid rgba(6, 182, 212, 0.3);
+        }
+        
+        header {
+            text-align: center;
+            padding: 40px 20px;
+            background: linear-gradient(90deg, var(--primary), var(--quantum));
+            position: relative;
+            overflow: hidden;
+        }
+        
+        header::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="none"><path d="M0,0 L100,0 L100,100 Z" fill="rgba(255,255,255,0.1)"/></svg>');
+            background-size: cover;
+            opacity: 0.2;
+        }
+        
+        h1 {
+            font-size: 2.8rem;
+            margin-bottom: 15px;
+            position: relative;
+            z-index: 1;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            max-width: 800px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .content {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 30px;
+            padding: 40px;
+        }
+        
+        .system-overview {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+        
+        @media (max-width: 900px) {
+            .system-overview {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .card {
+            background: rgba(15, 23, 42, 0.7);
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            transition: transform 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .quantum-system {
+            border-top: 5px solid var(--quantum);
+        }
+        
+        .classical-system {
+            border-top: 5px solid var(--classic);
+        }
+        
+        .interface-system {
+            border-top: 5px solid var(--accent);
+            grid-column: 1 / -1;
+        }
+        
+        .card h2 {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 1.8rem;
+        }
+        
+        .quantum-system h2 {
+            color: var(--quantum);
+        }
+        
+        .classical-system h2 {
+            color: var(--classic);
+        }
+        
+        .interface-system h2 {
+            color: var(--accent);
+        }
+        
+        .input-section {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+        
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            flex: 1;
+            min-width: 200px;
+        }
+        
+        label {
+            font-weight: 600;
+            color: #93c5fd;
+        }
+        
+        input, select, textarea {
+            padding: 14px 20px;
+            background: rgba(15, 23, 42, 0.9);
+            border: 2px solid var(--primary);
+            border-radius: 12px;
+            color: white;
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.3s;
+        }
+        
+        input:focus, select:focus, textarea:focus {
+            border-color: var(--quantum);
+            box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.3);
+        }
+        
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        
+        button {
+            padding: 14px 30px;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .quantum-btn {
+            background: linear-gradient(90deg, var(--primary), var(--quantum));
+        }
+        
+        .classic-btn {
+            background: linear-gradient(90deg, var(--primary), var(--classic));
+        }
+        
+        .interface-btn {
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+        }
+        
+        button:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
+        }
+        
+        .result-display {
+            font-family: 'Courier New', monospace;
+            font-size: 1.2rem;
+            padding: 20px;
+            background: rgba(15, 23, 42, 0.9);
+            border-radius: 10px;
+            margin-top: 15px;
+            overflow-x: auto;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .visualization {
+            height: 300px;
+            background: rgba(15, 23, 42, 0.9);
+            border-radius: 16px;
+            margin-top: 30px;
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .conversion-process {
+            background: rgba(236, 72, 153, 0.1);
+            border-radius: 16px;
+            padding: 25px;
+            margin-top: 30px;
+            border: 1px solid rgba(236, 72, 153, 0.3);
+        }
+        
+        .conversion-process h3 {
+            color: var(--accent);
+            margin-bottom: 15px;
+            font-size: 1.4rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .process-steps {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .process-step {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px;
+            background: rgba(15, 23, 42, 0.7);
+            border-radius: 10px;
+        }
+        
+        .step-number {
+            background: var(--accent);
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+        
+        .properties-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .property-card {
+            background: rgba(6, 182, 212, 0.15);
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+        }
+        
+        .property-card h4 {
+            color: #93c5fd;
+            margin-bottom: 10px;
+        }
+        
+        .property-value {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--quantum);
+        }
+        
+        footer {
+            text-align: center;
+            padding: 30px;
+            background: rgba(15, 23, 42, 0.9);
+            color: #94a3b8;
+            font-size: 1rem;
+            border-top: 1px solid rgba(6, 182, 212, 0.3);
+        }
+        
+        @media (max-width: 768px) {
+            .input-section {
+                flex-direction: column;
+            }
+            
+            .properties-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Interfaz entre Sistemas Cuánticos y Binarios - Simulador</h1>
+          <h1>Hybrid Quantum-Classical Computing</h1>
+            <p class="subtitle">Sistema de conversión y optimización para comunicación clásico-cuántica</p>
+        </header>
+        
+        <div class="content">
+            <div class="system-overview">
+                <div class="card quantum-system">
+                    <h2><i class="fas fa-atom"></i> Sistema Cuántico</h2>
+                    <p>Entrada desde procesador cuántico (qubits en superposición)</p>
+                    
+                    <div class="input-group">
+                        <label for="qubit-state">Estado del Qubit (α|0⟩ + β|1⟩):</label>
+                        <div class="input-section">
+                            <input type="number" id="alpha" step="0.1" value="0.7" min="-1" max="1" placeholder="α">
+                            <input type="number" id="beta" step="0.1" value="0.7" min="-1" max="1" placeholder="β">
+                        </div>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="quantum-data">Datos Cuánticos (JSON):</label>
+                        <textarea id="quantum-data">{
+  "qubits": 5,
+  "circuit_depth": 12,
+  "statevector": [0.7, 0.7, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+  "algorithm": "Grover"
+}</textarea>
+                    </div>
+                    
+                    <button class="quantum-btn" id="simulate-quantum">
+                        <i class="fas fa-play"></i> Simular Computación Cuántica
+                    </button>
+                    
+                    <div class="result-display" id="quantum-result">
+                        Estado cuántico: [0.7071, 0.7071] | Probabilidades: |0⟩=50.0%, |1⟩=50.0%
+                    </div>
+                </div>
+                
+                <div class="card classical-system">
+                    <h2><i class="fas fa-desktop"></i> Sistema Binario Clásico</h2>
+                    <p>Salida hacia sistemas tradicionales (bits clásicos)</p>
+                    
+                    <div class="input-group">
+                        <label for="classic-data">Datos Clásicos (binario):</label>
+                        <textarea id="classic-data">01001000 01101111 01101100 01100001 00100000 01001101 01110101 01101110 01100100 01101111</textarea>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="classic-action">Acción a Realizar:</label>
+                        <select id="classic-action">
+                            <option value="store">Almacenar en Base de Datos</option>
+                            <option value="process">Procesamiento Clásico</option>
+                            <option value="display">Visualizar Resultados</option>
+                            <option value="api">Enviar a API Externa</option>
+                        </select>
+                    </div>
+                    
+                    <button class="classic-btn" id="process-classic">
+                        <i class="fas fa-cog"></i> Procesar en Sistema Clásico
+                    </button>
+                    
+                    <div class="result-display" id="classic-result">
+                        Datos binarios recibidos: 01001000 (H) 01101111 (o) 01101100 (l) 01100001 (a)
+                    </div>
+                </div>
+                
+                <div class="card interface-system">
+                    <h2><i class="fas fa-exchange-alt"></i> Módulo de Interfaz Clásico-Cuántico</h2>
+                    <p>Conversión y optimización de información entre sistemas</p>
+                    
+                    <div class="input-section">
+                        <div class="input-group">
+                            <label for="conversion-type">Tipo de Conversión:</label>
+                            <select id="conversion-type">
+                                <option value="quantum-to-classic">Cuántico → Clásico (Medición)</option>
+                                <option value="classic-to-quantum">Clásico → Cuántico (Codificación)</option>
+                                <option value="hybrid">Procesamiento Híbrido</option>
+                            </select>
+                        </div>
+                        
+                        <div class="input-group">
+                            <label for="optimization-level">Nivel de Optimización:</label>
+                            <select id="optimization-level">
+                                <option value="basic">Básico (1 iteración)</option>
+                                <option value="standard">Estándar (10 iteraciones)</option>
+                                <option value="advanced">Avanzado (100 iteraciones)</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <button class="interface-btn" id="activate-interface">
+                        <i class="fas fa-bolt"></i> Activar Interfaz de Conversión
+                    </button>
+                    
+                    <div class="conversion-process">
+                        <h3><i class="fas fa-cogs"></i> Proceso de Conversión</h3>
+                        <div class="process-steps">
+                            <div class="process-step">
+                                <div class="step-number">1</div>
+                                <div>Recepcionar datos del sistema cuántico</div>
+                            </div>
+                            <div class="process-step">
+                                <div class="step-number">2</div>
+                                <div>Realizar medición colapsando estados de superposición</div>
+                            </div>
+                            <div class="process-step">
+                                <div class="step-number">3</div>
+                                <div>Convertir amplitudes de probabilidad a bits clásicos</div>
+                            </div>
+                            <div class="process-step">
+                                <div class="step-number">4</div>
+                                <div>Optimizar secuencia binaria resultante</div>
+                            </div>
+                            <div class="process-step">
+                                <div class="step-number">5</div>
+                                <div>Transmitir al sistema clásico para procesamiento</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="result-display" id="interface-result">
+                        Estado de la interfaz: Esperando activación
+                    </div>
+                    
+                    <div class="properties-grid">
+                        <div class="property-card">
+                            <h4>Eficiencia de Conversión</h4>
+                            <div class="property-value">98.7%</div>
+                        </div>
+                        <div class="property-card">
+                            <h4>Velocidad de Transmisión</h4>
+                            <div class="property-value">1.2 Gb/s</div>
+                        </div>
+                        <div class="property-card">
+                            <h4>Tasa de Error</h4>
+                            <div class="property-value">0.05%</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h2 style="color: var(--accent);"><i class="fas fa-chart-line"></i> Visualización de la Conversión</h2>
+                
+                <div class="visualization">
+                    <canvas id="conversion-chart"></canvas>
+                </div>
+                
+                <div class="input-section">
+                    <div class="input-group">
+                        <label for="data-size">Tamaño de Datos (qubits):</label>
+                        <input type="range" id="data-size" min="1" max="100" value="10">
+                        <output id="data-size-output">10 qubits</output>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="conversion-method">Método de Conversión:</label>
+                        <select id="conversion-method">
+                            <option value="standard">Medición Estándar</option>
+                            <option value="optimized">Medición Optimizada</option>
+                            <option value="partial">Medición Parcial</option>
+                            <option value="bayesian">Inferencia Bayesiana</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <button class="interface-btn" id="simulate-conversion">
+                    <i class="fas fa-sync-alt"></i> Simular Proceso de Conversión
+                </button>
+            </div>
+        </div>
+        
+        <footer>
+            <p>Sistema de Interfaz Clásico-Cuántico | Investigación y Desarrollo en Computación Híbrida</p>
+            <p>© 2025 - Tecnologías Cuánticas Aplicadas | Todos los DerechosReservados <strong><a href="https://informaticabigbosspy.blogspot.com/p/principal.html>BIG BOSS Informatica & Servicios</a></strong></p>
+        </footer>
+    </div>
+
+    <script>
+        // Simulador de sistema de interfaz clásico-cuántico
+        document.addEventListener('DOMContentLoaded', function() {
+            const conversionChart = new Chart(document.getElementById('conversion-chart').getContext('2d'), {
+                type: 'line',
+                data: {
+                    labels: ['Inicio', '25%', '50%', '75%', 'Completado'],
+                    datasets: [
+                        {
+                            label: 'Fidelidad Cuántica',
+                            data: [100, 85, 92, 97, 99],
+                            borderColor: '#06b6d4',
+                            backgroundColor: 'rgba(6, 182, 212, 0.1)',
+                            fill: true,
+                            tension: 0.4
+                        },
+                        {
+                            label: 'Precisión Clásica',
+                            data: [0, 40, 75, 90, 98],
+                            borderColor: '#10b981',
+                            backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                            fill: true,
+                            tension: 0.4
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            title: {
+                                display: true,
+                                text: 'Precisión (%)'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Proceso de Conversión'
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // Simular computación cuántica
+            document.getElementById('simulate-quantum').addEventListener('click', function() {
+                const alpha = parseFloat(document.getElementById('alpha').value);
+                const beta = parseFloat(document.getElementById('beta').value);
+                
+                // Normalizar el estado cuántico
+                const norm = Math.sqrt(alpha*alpha + beta*beta);
+                const alphaNorm = alpha / norm;
+                const betaNorm = beta / norm;
+                
+                // Calcular probabilidades
+                const prob0 = (alphaNorm * alphaNorm * 100).toFixed(1);
+                const prob1 = (betaNorm * betaNorm * 100).toFixed(1);
+                
+                document.getElementById('quantum-result').textContent = 
+                    `Estado cuántico: [${alphaNorm.toFixed(4)}, ${betaNorm.toFixed(4)}] | Probabilidades: |0⟩=${prob0}%, |1⟩=${prob1}%`;
+                
+                // Simular medición (colapso a estado clásico)
+                const random = Math.random();
+                const measuredValue = (random < alphaNorm*alphaNorm) ? 0 : 1;
+                
+                document.getElementById('classic-data').value = 
+                    measuredValue.toString(2).padStart(8, '0') + ' ' +
+                    '01110010 01100101 01110011 01110101 01101100 01110100 01100001 01100100 01101111';
+                
+                document.getElementById('interface-result').textContent = 
+                    `Medición realizada: colapsado a |${measuredValue}⟩ con ${Math.max(prob0, prob1)}% de probabilidad`;
+            });
+            
+            // Procesar en sistema clásico
+            document.getElementById('process-classic').addEventListener('click', function() {
+                const binaryData = document.getElementById('classic-data').value;
+                const action = document.getElementById('classic-action').value;
+                
+                // Convertir binario a texto (solo para demostración)
+                const binaryToString = (bin) => {
+                    return bin.split(' ').map(bin => {
+                        return String.fromCharCode(parseInt(bin, 2));
+                    }).join('');
+                };
+                
+                let resultText = "";
+                if (binaryData.includes(' ')) {
+                    resultText = binaryToString(binaryData);
+                } else {
+                    resultText = "Datos binarios procesados correctamente";
+                }
+                
+                document.getElementById('classic-result').textContent = 
+                    `Procesamiento ${action} completado: ${resultText}`;
+            });
+            
+            // Activar interfaz de conversión
+            document.getElementById('activate-interface').addEventListener('click', function() {
+                const conversionType = document.getElementById('conversion-type').value;
+                const optimizationLevel = document.getElementById('optimization-level').value;
+                
+                let iterations = 1;
+                if (optimizationLevel === 'standard') iterations = 10;
+                if (optimizationLevel === 'advanced') iterations = 100;
+                
+                document.getElementById('interface-result').textContent = 
+                    `Interfaz activada: ${conversionType} con ${iterations} iteraciones de optimización`;
+                
+                // Simular proceso de conversión con actualización de gráfico
+                simulateConversionProcess(conversionType, iterations);
+            });
+            
+            // Simular proceso de conversión
+            function simulateConversionProcess(type, iterations) {
+                let progress = 0;
+                const interval = setInterval(() => {
+                    progress += 5;
+                    if (progress > 100) {
+                        clearInterval(interval);
+                        document.getElementById('interface-result').textContent += 
+                            " | Conversión completada con éxito";
+                    }
+                    
+                    // Actualizar gráfico de progreso
+                    conversionChart.data.labels = ['Inicio', '25%', '50%', '75%', 'Completado'];
+                    
+                    if (type === 'quantum-to-classic') {
+                        conversionChart.data.datasets[0].data = [100, 85, 92, 97, 99];
+                        conversionChart.data.datasets[1].data = [0, 40, 75, 90, 98];
+                    } else if (type === 'classic-to-quantum') {
+                        conversionChart.data.datasets[0].data = [0, 30, 65, 85, 95];
+                        conversionChart.data.datasets[1].data = [100, 90, 88, 92, 96];
+                    } else {
+                        conversionChart.data.datasets[0].data = [50, 70, 85, 92, 98];
+                        conversionChart.data.datasets[1].data = [50, 70, 85, 92, 98];
+                    }
+                    
+                    conversionChart.update();
+                }, 100);
+            }
+            
+            // Control deslizante para tamaño de datos
+            const dataSizeSlider = document.getElementById('data-size');
+            const dataSizeOutput = document.getElementById('data-size-output');
+            
+            dataSizeSlider.addEventListener('input', function() {
+                dataSizeOutput.textContent = `${this.value} qubits`;
+            });
+            
+            // Simular conversión
+            document.getElementById('simulate-conversion').addEventListener('click', function() {
+                const dataSize = document.getElementById('data-size').value;
+                const method = document.getElementById('conversion-method').value;
+                
+                document.getElementById('interface-result').textContent = 
+                    `Simulación de conversión: ${dataSize} qubits usando método ${method}`;
+                
+                simulateConversionProcess('quantum-to-classic', 10);
+            });
+        });
+    </script>
+</body>
+</html>
