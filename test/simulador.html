@@ -1478,6 +1478,353 @@
             </div>
         </main>
 
+           
+        </main>
+        
+    </div>
+
+    <script>
+        // Estado para rotaciones de cada cubo
+        let cubeRotations = Array(8).fill({ x: 0, y: 0 });
+        
+        // Contenedor de cubos
+        const cubesContainer = document.getElementById('cubesContainer');
+        
+        // Crear los 8 cubos dinámicamente
+        for (let i = 0; i < 8; i++) {
+            const cubeContainer = document.createElement('div');
+            cubeContainer.className = 'cube-container';
+            
+            const cube = document.createElement('div');
+            cube.className = 'cube';
+            cube.dataset.index = i;
+            
+            // Crear las 6 caras del cubo
+            const faces = [
+                { name: 'front', text: 'F' },
+                { name: 'back', text: 'B' },
+                { name: 'right', text: 'R' },
+                { name: 'left', text: 'L' },
+                { name: 'top', text: 'T' },
+                { name: 'bottom', text: 'M' }
+            ];
+            
+            faces.forEach(face => {
+                const faceEl = document.createElement('div');
+                faceEl.className = `face ${face.name}`;
+                faceEl.textContent = '0';
+                cube.appendChild(faceEl);
+            });
+            
+            cubeContainer.appendChild(cube);
+            cubesContainer.appendChild(cubeContainer);
+        }
+        
+        const cubes = document.querySelectorAll('.cube');
+        const byteInputContainer = document.getElementById('byteInput');
+        const cubitsDisplayContainer = document.getElementById('cubitsDisplay');
+        const rowBytesDisplayContainer = document.getElementById('rowBytesDisplay');
+        const asciiByteSpan = document.getElementById('asciiByte');
+        const asciiCubitsSpan = document.getElementById('asciiCubits');
+        const randomizeBtn = document.getElementById('randomizeBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const rotateUpBtn = document.getElementById('rotateUpBtn');
+        const rotateDownBtn = document.getElementById('rotateDownBtn');
+        const rotateLeftBtn = document.getElementById('rotateLeftBtn');
+        const rotateRightBtn = document.getElementById('rotateRightBtn');
+        
+        // Crear inputs para el byte
+        for (let i = 0; i < 8; i++) {
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.className = 'bit-input';
+            input.maxLength = 1;
+            input.dataset.index = i;
+            input.value = '0';
+            input.addEventListener('input', handleBitInput);
+            byteInputContainer.appendChild(input);
+        }
+        
+        // Crear representación CUBIT
+        for (let i = 0; i < 8; i++) {
+            const column = document.createElement('div');
+            column.className = 'cubit-column';
+            column.dataset.index = i;
+            
+            const label = document.createElement('div');
+            label.className = 'cubit-label';
+            label.textContent = `CUBIT ${i+1}`;
+            column.appendChild(label);
+            
+            for (let j = 0; j < 6; j++) {
+                const bit = document.createElement('div');
+                bit.className = 'cubit-bit';
+                bit.dataset.bitIndex = j;
+                bit.textContent = '0';
+                column.appendChild(bit);
+            }
+            cubitsDisplayContainer.appendChild(column);
+        }
+        
+        // Crear filas de bytes
+        for (let i = 0; i < 6; i++) {
+            const rowByte = document.createElement('div');
+            rowByte.className = 'row-byte';
+            rowByte.dataset.row = i;
+            
+            const label = document.createElement('div');
+            label.className = 'row-label';
+            label.textContent = `BYTE ${i+1}:`;
+            rowByte.appendChild(label);
+            
+            const bitsContainer = document.createElement('div');
+            bitsContainer.className = 'row-bits';
+            
+            for (let j = 0; j < 8; j++) {
+                const bit = document.createElement('div');
+                bit.className = 'row-bit';
+                bit.dataset.bitIndex = j;
+                bit.textContent = '0';
+                bitsContainer.appendChild(bit);
+            }
+            rowByte.appendChild(bitsContainer);
+            
+            const utf8 = document.createElement('div');
+            utf8.className = 'row-utf8';
+            utf8.textContent = '→ 0 (NUL)';
+            utf8.id = `rowUtf8${i}`;
+            rowByte.appendChild(utf8);
+            
+            rowBytesDisplayContainer.appendChild(rowByte);
+        }
+        
+        // Función para actualizar las caras de los cubos con los bits
+        function updateCubeFaces() {
+            const inputs = document.querySelectorAll('.bit-input');
+            const byte = Array.from(inputs).map(input => input.value).join('');
+            
+            cubes.forEach((cube, cubeIndex) => {
+                const faces = cube.querySelectorAll('.face');
+                const faceNames = ['front', 'back', 'right', 'left', 'top', 'bottom'];
+                
+                // Calcular los bits para este cubo
+                const bits = [];
+                for (let i = 0; i < 6; i++) {
+                    const bitIndex = (cubeIndex + i) % 8;
+                    bits.push(byte[bitIndex]);
+                }
+                
+                // Actualizar cada cara
+                faceNames.forEach((faceName, faceIndex) => {
+                    const face = cube.querySelector(`.${faceName}`);
+                    face.textContent = bits[faceIndex];
+                    face.classList.toggle('active', bits[faceIndex] === '1');
+                });
+                
+                // Aplicar rotación actual
+                applyCubeRotation(cube, cubeIndex);
+            });
+        }
+        
+        // Función para aplicar rotación a un cubo específico
+        function applyCubeRotation(cube, index) {
+            const { x, y } = cubeRotations[index];
+            cube.style.transform = `rotateX(${x}deg) rotateY(${y}deg)`;
+            cube.style.transition = 'transform 0.8s ease';
+        }
+        
+        // Funciones de rotación específica
+        rotateUpBtn.addEventListener('click', () => {
+            cubes.forEach((cube, index) => {
+                cubeRotations[index] = { 
+                    ...cubeRotations[index], 
+                    x: cubeRotations[index].x - 90 
+                };
+                applyCubeRotation(cube, index);
+            });
+        });
+        
+        rotateDownBtn.addEventListener('click', () => {
+            cubes.forEach((cube, index) => {
+                cubeRotations[index] = { 
+                    ...cubeRotations[index], 
+                    x: cubeRotations[index].x + 90 
+                };
+                applyCubeRotation(cube, index);
+            });
+        });
+        
+        rotateLeftBtn.addEventListener('click', () => {
+            cubes.forEach((cube, index) => {
+                cubeRotations[index] = { 
+                    ...cubeRotations[index], 
+                    y: cubeRotations[index].y - 90 
+                };
+                applyCubeRotation(cube, index);
+            });
+        });
+        
+        rotateRightBtn.addEventListener('click', () => {
+            cubes.forEach((cube, index) => {
+                cubeRotations[index] = { 
+                    ...cubeRotations[index], 
+                    y: cubeRotations[index].y + 90 
+                };
+                applyCubeRotation(cube, index);
+            });
+        });
+        
+        // Función para manejar inputs de bits
+        function handleBitInput(e) {
+            const value = e.target.value;
+            if (value !== '0' && value !== '1') {
+                e.target.value = '';
+                return;
+            }
+            e.target.classList.toggle('active', value === '1');
+            updateCubitsDisplay();
+            updateAsciiValues();
+            updateRowBytesDisplay();
+            updateCubeFaces();
+        }
+        
+        // Función para actualizar la representación CUBIT
+        function updateCubitsDisplay() {
+            const inputs = document.querySelectorAll('.bit-input');
+            const byte = Array.from(inputs).map(input => input.value).join('');
+            
+            for (let i = 0; i < 8; i++) {
+                const cubitBits = [];
+                for (let j = 0; j < 6; j++) {
+                    const bitIndex = (i + j) % 8;
+                    cubitBits.push(byte[bitIndex]);
+                }
+                const column = document.querySelector(`.cubit-column[data-index="${i}"]`);
+                const bits = column.querySelectorAll('.cubit-bit');
+                cubitBits.forEach((bit, index) => {
+                    bits[index].textContent = bit;
+                    bits[index].classList.toggle('active', bit === '1');
+                });
+            }
+        }
+        
+        // Función para actualizar valores ASCII
+        function updateAsciiValues() {
+            const inputs = document.querySelectorAll('.bit-input');
+            const byte = Array.from(inputs).map(input => input.value).join('');
+            
+            const byteValue = parseInt(byte, 2);
+            asciiByteSpan.textContent = byteValue >= 32 && byteValue <= 126 ? 
+                `${byteValue} → '${String.fromCharCode(byteValue)}'` : 
+                `${byteValue} → (No imprimible)`;
+            
+            const cubitAscii = [];
+            for (let i = 0; i < 8; i++) {
+                const cubitBits = [];
+                for (let j = 0; j < 6; j++) {
+                    const bitIndex = (i + j) % 8;
+                    cubitBits.push(byte[bitIndex]);
+                }
+                const cubitValue = parseInt(cubitBits.join(''), 2);
+                cubitAscii.push(cubitValue >= 32 && cubitValue <= 126 ? 
+                    `'${String.fromCharCode(cubitValue)}'` : 
+                    'X');
+            }
+            asciiCubitsSpan.textContent = cubitAscii.join(' ');
+        }
+        
+        // Función para actualizar filas de bytes
+        function updateRowBytesDisplay() {
+            const inputs = document.querySelectorAll('.bit-input');
+            const byte = Array.from(inputs).map(input => input.value).join('');
+            
+            for (let row = 0; row < 6; row++) {
+                const rowBits = [];
+                for (let col = 0; col < 8; col++) {
+                    const bitIndex = (col + row) % 8;
+                    rowBits.push(byte[bitIndex]);
+                }
+                const rowByte = rowBits.join('');
+                const rowValue = parseInt(rowByte, 2);
+                
+                const rowElement = document.querySelector(`.row-byte[data-row="${row}"]`);
+                const bits = rowElement.querySelectorAll('.row-bit');
+                rowBits.forEach((bit, index) => {
+                    bits[index].textContent = bit;
+                    bits[index].classList.toggle('active', bit === '1');
+                });
+                
+                const utf8Element = rowElement.querySelector('.row-utf8');
+                let char = '';
+                let displayText = '';
+                
+                if (rowValue === 0) {
+                    displayText = `→ ${rowValue} (NUL)`;
+                } else if (rowValue < 32 || rowValue === 127) {
+                    displayText = `→ ${rowValue} (Control)`;
+                } else if (rowValue >= 128 && rowValue <= 255) {
+                    char = String.fromCodePoint(rowValue);
+                    displayText = `→ ${rowValue} ${char} (UTF-8)`;
+                } else {
+                    char = String.fromCharCode(rowValue);
+                    displayText = `→ ${rowValue} '${char}'`;
+                }
+                
+                utf8Element.textContent = displayText;
+            }
+        }
+        
+        // Evento para el botón Aleatorio
+        randomizeBtn.addEventListener('click', () => {
+            const inputs = document.querySelectorAll('.bit-input');
+            inputs.forEach(input => {
+                const value = Math.random() > 0.5 ? '1' : '0';
+                input.value = value;
+                input.classList.toggle('active', value === '1');
+            });
+            
+            // Rotar cubos aleatoriamente
+            cubes.forEach((cube, index) => {
+                cubeRotations[index] = { 
+                    x: Math.floor(Math.random() * 4) * 90,
+                    y: Math.floor(Math.random() * 4) * 90
+                };
+                applyCubeRotation(cube, index);
+            });
+            
+            updateCubitsDisplay();
+            updateAsciiValues();
+            updateRowBytesDisplay();
+            updateCubeFaces();
+        });
+        
+        // Evento para el botón Reiniciar
+        resetBtn.addEventListener('click', () => {
+            const inputs = document.querySelectorAll('.bit-input');
+            inputs.forEach(input => {
+                input.value = '0';
+                input.classList.remove('active');
+            });
+            
+            // Reiniciar rotación de cubos
+            cubes.forEach((cube, index) => {
+                cubeRotations[index] = { x: 0, y: 0 };
+                applyCubeRotation(cube, index);
+            });
+            
+            updateCubitsDisplay();
+            updateAsciiValues();
+            updateRowBytesDisplay();
+            updateCubeFaces();
+        });
+        
+        // Inicializar display
+        updateCubitsDisplay();
+        updateAsciiValues();
+        updateRowBytesDisplay();
+        updateCubeFaces();
+    </script>
+</body>
         <div>
 
 <head>
@@ -2371,9 +2718,7 @@
 </body>
        
    </div> 
-           
-        </main>
-        
+
         <footer>
             <p>Teoría de CUBITs - Un modelo conceptual para la representación multidimensional de datos</p>
             <p>En desarrollo experimental - Arnaldo A. Ozorio</p>
@@ -2381,349 +2726,6 @@
             <p>Copyright © 2025 | CUBITs - Arnaldo A. Ozorio | <a href="https://informaticabigbosspy.blogspot.com/p/principal.html"><strong>BIG BOSS Informática || Servicios</strong></a>.<br>
             Todos los derechos reservados.</p>
         </footer>
-    </div>
-
-    <script>
-        // Estado para rotaciones de cada cubo
-        let cubeRotations = Array(8).fill({ x: 0, y: 0 });
-        
-        // Contenedor de cubos
-        const cubesContainer = document.getElementById('cubesContainer');
-        
-        // Crear los 8 cubos dinámicamente
-        for (let i = 0; i < 8; i++) {
-            const cubeContainer = document.createElement('div');
-            cubeContainer.className = 'cube-container';
-            
-            const cube = document.createElement('div');
-            cube.className = 'cube';
-            cube.dataset.index = i;
-            
-            // Crear las 6 caras del cubo
-            const faces = [
-                { name: 'front', text: 'F' },
-                { name: 'back', text: 'B' },
-                { name: 'right', text: 'R' },
-                { name: 'left', text: 'L' },
-                { name: 'top', text: 'T' },
-                { name: 'bottom', text: 'M' }
-            ];
-            
-            faces.forEach(face => {
-                const faceEl = document.createElement('div');
-                faceEl.className = `face ${face.name}`;
-                faceEl.textContent = '0';
-                cube.appendChild(faceEl);
-            });
-            
-            cubeContainer.appendChild(cube);
-            cubesContainer.appendChild(cubeContainer);
-        }
-        
-        const cubes = document.querySelectorAll('.cube');
-        const byteInputContainer = document.getElementById('byteInput');
-        const cubitsDisplayContainer = document.getElementById('cubitsDisplay');
-        const rowBytesDisplayContainer = document.getElementById('rowBytesDisplay');
-        const asciiByteSpan = document.getElementById('asciiByte');
-        const asciiCubitsSpan = document.getElementById('asciiCubits');
-        const randomizeBtn = document.getElementById('randomizeBtn');
-        const resetBtn = document.getElementById('resetBtn');
-        const rotateUpBtn = document.getElementById('rotateUpBtn');
-        const rotateDownBtn = document.getElementById('rotateDownBtn');
-        const rotateLeftBtn = document.getElementById('rotateLeftBtn');
-        const rotateRightBtn = document.getElementById('rotateRightBtn');
-        
-        // Crear inputs para el byte
-        for (let i = 0; i < 8; i++) {
-            const input = document.createElement('input');
-            input.type = 'text';
-            input.className = 'bit-input';
-            input.maxLength = 1;
-            input.dataset.index = i;
-            input.value = '0';
-            input.addEventListener('input', handleBitInput);
-            byteInputContainer.appendChild(input);
-        }
-        
-        // Crear representación CUBIT
-        for (let i = 0; i < 8; i++) {
-            const column = document.createElement('div');
-            column.className = 'cubit-column';
-            column.dataset.index = i;
-            
-            const label = document.createElement('div');
-            label.className = 'cubit-label';
-            label.textContent = `CUBIT ${i+1}`;
-            column.appendChild(label);
-            
-            for (let j = 0; j < 6; j++) {
-                const bit = document.createElement('div');
-                bit.className = 'cubit-bit';
-                bit.dataset.bitIndex = j;
-                bit.textContent = '0';
-                column.appendChild(bit);
-            }
-            cubitsDisplayContainer.appendChild(column);
-        }
-        
-        // Crear filas de bytes
-        for (let i = 0; i < 6; i++) {
-            const rowByte = document.createElement('div');
-            rowByte.className = 'row-byte';
-            rowByte.dataset.row = i;
-            
-            const label = document.createElement('div');
-            label.className = 'row-label';
-            label.textContent = `BYTE ${i+1}:`;
-            rowByte.appendChild(label);
-            
-            const bitsContainer = document.createElement('div');
-            bitsContainer.className = 'row-bits';
-            
-            for (let j = 0; j < 8; j++) {
-                const bit = document.createElement('div');
-                bit.className = 'row-bit';
-                bit.dataset.bitIndex = j;
-                bit.textContent = '0';
-                bitsContainer.appendChild(bit);
-            }
-            rowByte.appendChild(bitsContainer);
-            
-            const utf8 = document.createElement('div');
-            utf8.className = 'row-utf8';
-            utf8.textContent = '→ 0 (NUL)';
-            utf8.id = `rowUtf8${i}`;
-            rowByte.appendChild(utf8);
-            
-            rowBytesDisplayContainer.appendChild(rowByte);
-        }
-        
-        // Función para actualizar las caras de los cubos con los bits
-        function updateCubeFaces() {
-            const inputs = document.querySelectorAll('.bit-input');
-            const byte = Array.from(inputs).map(input => input.value).join('');
-            
-            cubes.forEach((cube, cubeIndex) => {
-                const faces = cube.querySelectorAll('.face');
-                const faceNames = ['front', 'back', 'right', 'left', 'top', 'bottom'];
-                
-                // Calcular los bits para este cubo
-                const bits = [];
-                for (let i = 0; i < 6; i++) {
-                    const bitIndex = (cubeIndex + i) % 8;
-                    bits.push(byte[bitIndex]);
-                }
-                
-                // Actualizar cada cara
-                faceNames.forEach((faceName, faceIndex) => {
-                    const face = cube.querySelector(`.${faceName}`);
-                    face.textContent = bits[faceIndex];
-                    face.classList.toggle('active', bits[faceIndex] === '1');
-                });
-                
-                // Aplicar rotación actual
-                applyCubeRotation(cube, cubeIndex);
-            });
-        }
-        
-        // Función para aplicar rotación a un cubo específico
-        function applyCubeRotation(cube, index) {
-            const { x, y } = cubeRotations[index];
-            cube.style.transform = `rotateX(${x}deg) rotateY(${y}deg)`;
-            cube.style.transition = 'transform 0.8s ease';
-        }
-        
-        // Funciones de rotación específica
-        rotateUpBtn.addEventListener('click', () => {
-            cubes.forEach((cube, index) => {
-                cubeRotations[index] = { 
-                    ...cubeRotations[index], 
-                    x: cubeRotations[index].x - 90 
-                };
-                applyCubeRotation(cube, index);
-            });
-        });
-        
-        rotateDownBtn.addEventListener('click', () => {
-            cubes.forEach((cube, index) => {
-                cubeRotations[index] = { 
-                    ...cubeRotations[index], 
-                    x: cubeRotations[index].x + 90 
-                };
-                applyCubeRotation(cube, index);
-            });
-        });
-        
-        rotateLeftBtn.addEventListener('click', () => {
-            cubes.forEach((cube, index) => {
-                cubeRotations[index] = { 
-                    ...cubeRotations[index], 
-                    y: cubeRotations[index].y - 90 
-                };
-                applyCubeRotation(cube, index);
-            });
-        });
-        
-        rotateRightBtn.addEventListener('click', () => {
-            cubes.forEach((cube, index) => {
-                cubeRotations[index] = { 
-                    ...cubeRotations[index], 
-                    y: cubeRotations[index].y + 90 
-                };
-                applyCubeRotation(cube, index);
-            });
-        });
-        
-        // Función para manejar inputs de bits
-        function handleBitInput(e) {
-            const value = e.target.value;
-            if (value !== '0' && value !== '1') {
-                e.target.value = '';
-                return;
-            }
-            e.target.classList.toggle('active', value === '1');
-            updateCubitsDisplay();
-            updateAsciiValues();
-            updateRowBytesDisplay();
-            updateCubeFaces();
-        }
-        
-        // Función para actualizar la representación CUBIT
-        function updateCubitsDisplay() {
-            const inputs = document.querySelectorAll('.bit-input');
-            const byte = Array.from(inputs).map(input => input.value).join('');
-            
-            for (let i = 0; i < 8; i++) {
-                const cubitBits = [];
-                for (let j = 0; j < 6; j++) {
-                    const bitIndex = (i + j) % 8;
-                    cubitBits.push(byte[bitIndex]);
-                }
-                const column = document.querySelector(`.cubit-column[data-index="${i}"]`);
-                const bits = column.querySelectorAll('.cubit-bit');
-                cubitBits.forEach((bit, index) => {
-                    bits[index].textContent = bit;
-                    bits[index].classList.toggle('active', bit === '1');
-                });
-            }
-        }
-        
-        // Función para actualizar valores ASCII
-        function updateAsciiValues() {
-            const inputs = document.querySelectorAll('.bit-input');
-            const byte = Array.from(inputs).map(input => input.value).join('');
-            
-            const byteValue = parseInt(byte, 2);
-            asciiByteSpan.textContent = byteValue >= 32 && byteValue <= 126 ? 
-                `${byteValue} → '${String.fromCharCode(byteValue)}'` : 
-                `${byteValue} → (No imprimible)`;
-            
-            const cubitAscii = [];
-            for (let i = 0; i < 8; i++) {
-                const cubitBits = [];
-                for (let j = 0; j < 6; j++) {
-                    const bitIndex = (i + j) % 8;
-                    cubitBits.push(byte[bitIndex]);
-                }
-                const cubitValue = parseInt(cubitBits.join(''), 2);
-                cubitAscii.push(cubitValue >= 32 && cubitValue <= 126 ? 
-                    `'${String.fromCharCode(cubitValue)}'` : 
-                    'X');
-            }
-            asciiCubitsSpan.textContent = cubitAscii.join(' ');
-        }
-        
-        // Función para actualizar filas de bytes
-        function updateRowBytesDisplay() {
-            const inputs = document.querySelectorAll('.bit-input');
-            const byte = Array.from(inputs).map(input => input.value).join('');
-            
-            for (let row = 0; row < 6; row++) {
-                const rowBits = [];
-                for (let col = 0; col < 8; col++) {
-                    const bitIndex = (col + row) % 8;
-                    rowBits.push(byte[bitIndex]);
-                }
-                const rowByte = rowBits.join('');
-                const rowValue = parseInt(rowByte, 2);
-                
-                const rowElement = document.querySelector(`.row-byte[data-row="${row}"]`);
-                const bits = rowElement.querySelectorAll('.row-bit');
-                rowBits.forEach((bit, index) => {
-                    bits[index].textContent = bit;
-                    bits[index].classList.toggle('active', bit === '1');
-                });
-                
-                const utf8Element = rowElement.querySelector('.row-utf8');
-                let char = '';
-                let displayText = '';
-                
-                if (rowValue === 0) {
-                    displayText = `→ ${rowValue} (NUL)`;
-                } else if (rowValue < 32 || rowValue === 127) {
-                    displayText = `→ ${rowValue} (Control)`;
-                } else if (rowValue >= 128 && rowValue <= 255) {
-                    char = String.fromCodePoint(rowValue);
-                    displayText = `→ ${rowValue} ${char} (UTF-8)`;
-                } else {
-                    char = String.fromCharCode(rowValue);
-                    displayText = `→ ${rowValue} '${char}'`;
-                }
-                
-                utf8Element.textContent = displayText;
-            }
-        }
-        
-        // Evento para el botón Aleatorio
-        randomizeBtn.addEventListener('click', () => {
-            const inputs = document.querySelectorAll('.bit-input');
-            inputs.forEach(input => {
-                const value = Math.random() > 0.5 ? '1' : '0';
-                input.value = value;
-                input.classList.toggle('active', value === '1');
-            });
-            
-            // Rotar cubos aleatoriamente
-            cubes.forEach((cube, index) => {
-                cubeRotations[index] = { 
-                    x: Math.floor(Math.random() * 4) * 90,
-                    y: Math.floor(Math.random() * 4) * 90
-                };
-                applyCubeRotation(cube, index);
-            });
-            
-            updateCubitsDisplay();
-            updateAsciiValues();
-            updateRowBytesDisplay();
-            updateCubeFaces();
-        });
-        
-        // Evento para el botón Reiniciar
-        resetBtn.addEventListener('click', () => {
-            const inputs = document.querySelectorAll('.bit-input');
-            inputs.forEach(input => {
-                input.value = '0';
-                input.classList.remove('active');
-            });
-            
-            // Reiniciar rotación de cubos
-            cubes.forEach((cube, index) => {
-                cubeRotations[index] = { x: 0, y: 0 };
-                applyCubeRotation(cube, index);
-            });
-            
-            updateCubitsDisplay();
-            updateAsciiValues();
-            updateRowBytesDisplay();
-            updateCubeFaces();
-        });
-        
-        // Inicializar display
-        updateCubitsDisplay();
-        updateAsciiValues();
-        updateRowBytesDisplay();
-        updateCubeFaces();
-    </script>
-</body>
+       
 </html>
   
